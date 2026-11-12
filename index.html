@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Office</title>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="hud">
+    <div id="room"></div>
+    <canvas id="minimap" width="260" height="170"></canvas>
+    <div id="crosshair"></div>
+    <div id="prompt" hidden></div>
+    <div id="lockhint" hidden>Click to look around</div>
+    <div id="source"></div>
+    <div id="toast" hidden></div>
+    <div id="crew">
+      <span>Contractors</span>
+      <button id="c-minus" aria-label="Remove a contractor">−</button>
+      <b id="c-count">2</b>
+      <button id="c-plus" aria-label="Add a contractor">+</button>
+    </div>
+    <div id="help"><kbd>W A S D</kbd> move <kbd>Mouse</kbd> look <kbd>Shift</kbd> run <kbd>E</kbd> talk <kbd>F</kbd> desk board / rack <kbd>−</kbd><kbd>=</kbd> contractors</div>
+  </div>
+
+  <div id="start">
+    <div class="start-card">
+      <p class="eyebrow">First-person agent HQ</p>
+      <h1>Agent Office</h1>
+      <p>Walk the startup house, visit each agent at their desk, check their Kanban and Gantt, and talk to them directly. The garage is the server room.</p>
+      <button id="enter">Click to walk in</button>
+      <p class="keys">WASD + mouse · E to talk · F for the desk board · Esc to release the mouse</p>
+    </div>
+  </div>
+
+  <div id="dialogue" hidden>
+    <div class="bar top"></div>
+    <div class="bar bottom"></div>
+    <div class="speech">
+      <div class="who"><b id="d-name"></b><span id="d-role"></span></div>
+      <p id="d-you" hidden></p>
+      <p id="d-line"></p>
+      <p id="d-mock"></p>
+    </div>
+    <div class="choices">
+      <ol id="d-choices"></ol>
+      <form id="d-form">
+        <input id="d-input" type="text" autocomplete="off" placeholder="Say something else…" />
+        <button type="submit">Say</button>
+      </form>
+      <p class="hint">Press 1–7 to choose · Esc to leave</p>
+    </div>
+  </div>
+
+  <div id="panel" hidden>
+    <div class="panel-card">
+      <header>
+        <div class="title"><i id="p-dot"></i><div><b id="p-name"></b><span id="p-role"></span></div></div>
+        <nav>
+          <button data-tab="kanban">Kanban</button>
+          <button data-tab="gantt">Gantt</button>
+        </nav>
+        <div class="scope">
+          <button data-scope="agent">This desk</button>
+          <button data-scope="team">Whole team</button>
+        </div>
+        <button id="p-talk">Talk</button>
+        <button id="p-close" aria-label="Close">Esc ✕</button>
+      </header>
+      <div id="p-body"></div>
+    </div>
+  </div>
+
+  <div id="registry" hidden>
+    <div class="panel-card">
+      <header>
+        <div class="title"><i style="background:#2c9bff"></i><div><b>Server room registry</b><span id="r-sub"></span></div></div>
+        <button id="r-add">+ Add resource</button>
+        <button id="r-save" class="primary" disabled>Save</button>
+        <button id="r-close" aria-label="Close">Esc ✕</button>
+      </header>
+      <div id="r-body"></div>
+    </div>
+  </div>
+
+  <div id="editor" hidden>
+    <form class="editor-card" id="e-form">
+      <h2>Edit task</h2>
+      <label>Title<input id="e-title" type="text" required /></label>
+      <div class="row">
+        <label>Assignee<select id="e-assignee"></select></label>
+        <label>Status<select id="e-status"></select></label>
+      </div>
+      <div class="row">
+        <label>Start<input id="e-start" type="date" required /></label>
+        <label>End<input id="e-end" type="date" required /></label>
+      </div>
+      <label class="check"><input id="e-blocked" type="checkbox" /> Blocked</label>
+      <div class="actions">
+        <button type="button" id="e-delete" class="danger">Delete</button>
+        <span></span>
+        <button type="button" id="e-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

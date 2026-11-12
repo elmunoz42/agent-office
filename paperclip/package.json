@@ -1,0 +1,9 @@
+{
+  "name": "sen-paperclip-instance",
+  "private": true,
+  "description": "Pinned Node 24 + Paperclip CLI for the Space Exploration News instance",
+  "dependencies": {
+    "node": "^24.22.3",
+    "paperclipai": "^2026.1106.0"
+  }
+}
