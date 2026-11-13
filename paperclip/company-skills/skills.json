@@ -316,6 +316,16 @@
         "marketing"
       ],
       "note": "Needs the ARTCRAFT_API_KEY Paperclip secret bound to Erlich's env. Spends credits: generates only with a board-approved count."
+    },
+    "aws-amplify": {
+      "source": "aws/agent-toolkit-for-aws@94c87f7:skills/specialized-skills/web-and-mobile-development/aws-amplify",
+      "license": "Apache-2.0",
+      "author": "AWS",
+      "agents": [
+        "backend",
+        "frontend"
+      ],
+      "changes": "Added a board-approval rule to SKILL.md and references/deployment.md for anything that creates or changes AWS resources (ampx sandbox/deploy, IAM roles, Amplify console)."
     }
   }
 }
