@@ -9,7 +9,10 @@ WorkingDirectory=%h/dev/agent-office/paperclip
 Environment=PAPERCLIP_HOME=%h/.paperclip-sen
 Environment=PATH=%h/dev/agent-office/paperclip/node_modules/.bin:%h/.local/bin:%h/.nvm/versions/node/v24.20.0/bin:/usr/local/bin:/usr/bin:/bin
 UMask=0022
-ExecStart=%h/dev/agent-office/paperclip/node_modules/.bin/paperclipai run --instance default
+# Preload the runner platform probe before the server's heavy imports: it
+# times out after 1 s, and on a small instance the busy startup event loop
+# makes it miss, so Paperclip wrongly reports the Paperclip Runner unavailable.
+ExecStart=%h/dev/agent-office/paperclip/node_modules/node/bin/node --import=file://%h/dev/agent-office/paperclip/node_modules/@paperclipai/server/dist/lib/agent-runner-platform.js %h/dev/agent-office/paperclip/node_modules/paperclipai/dist/index.js run --instance default
 Restart=on-failure
 RestartSec=10
 
