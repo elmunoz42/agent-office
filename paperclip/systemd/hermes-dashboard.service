@@ -1,0 +1,15 @@
+# Hermes web dashboard and chat at http://127.0.0.1:9119 (loopback only; open it
+# through the SSH tunnel). Same HERMES_HOME as Richard's runs, so it shares his
+# Hermes memory and skills.
+[Unit]
+Description=Hermes web dashboard and chat
+
+[Service]
+Environment=HERMES_HOME=%h/.hermes
+Environment=PATH=%h/.hermes/hermes-agent/venv/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.hermes/hermes-agent/venv/bin/python %h/.hermes/hermes-agent/hermes dashboard --host 127.0.0.1 --port 9119 --no-open --skip-build
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
