@@ -1,0 +1,312 @@
+{
+  "about": "Skills given to individual Paperclip agents. Each key is a folder here; sync_skills.py pushes them into Paperclip and assigns them by office id. Third-party skills are copied at the pinned commit after a read-through; update by re-copying from a newer commit and re-vetting.",
+  "skills": {
+    "prototype": {
+      "source": "agent-os paperclip branch (skills/prototype), adapted from mattpocock/skills@5863806",
+      "license": "MIT",
+      "agents": [
+        "hermes"
+      ]
+    },
+    "grill-me-with-docs": {
+      "source": "agent-os paperclip branch (skills/grill-me-with-docs), adapted from mattpocock/skills@5863806",
+      "license": "MIT",
+      "agents": [
+        "hermes"
+      ]
+    },
+    "graduate-prototype": {
+      "source": "agent-os paperclip branch (skills/graduate-prototype)",
+      "license": "MIT",
+      "agents": [
+        "hermes"
+      ]
+    },
+    "tavily-search": {
+      "source": "tavily-ai/skills@32889e6:skills/core/tavily-search",
+      "license": "MIT",
+      "author": "Tavily",
+      "agents": [
+        "research-1",
+        "research-2"
+      ],
+      "note": "Use the installed tvly only: do not run its install, init, update or npx fallback lines."
+    },
+    "tavily-research": {
+      "source": "tavily-ai/skills@32889e6:skills/tasks/tavily-research",
+      "license": "MIT",
+      "author": "Tavily",
+      "agents": [
+        "research-1",
+        "research-2"
+      ],
+      "note": "Use the installed tvly only: do not run its install, init, update or npx fallback lines."
+    },
+    "react-best-practices": {
+      "source": "vercel-labs/agent-skills@1a2c79d:skills/react-best-practices",
+      "license": "MIT",
+      "author": "Vercel",
+      "agents": [
+        "frontend"
+      ],
+      "changes": "Dropped the compiled AGENTS.md copy (same rules as rules/) so it is never read as project instructions."
+    },
+    "composition-patterns": {
+      "source": "vercel-labs/agent-skills@1a2c79d:skills/composition-patterns",
+      "license": "MIT",
+      "author": "Vercel",
+      "agents": [
+        "frontend"
+      ],
+      "changes": "Dropped the compiled AGENTS.md copy."
+    },
+    "frontend-design": {
+      "source": "anthropics/skills@2c5958e:skills/frontend-design",
+      "license": "Apache-2.0",
+      "author": "Anthropic",
+      "agents": [
+        "frontend"
+      ]
+    },
+    "tdd": {
+      "source": "mattpocock/skills@5863806:skills/engineering/tdd",
+      "license": "MIT",
+      "author": "Matt Pocock",
+      "agents": [
+        "frontend",
+        "backend",
+        "contractor-1",
+        "contractor-2"
+      ]
+    },
+    "codebase-design": {
+      "source": "mattpocock/skills@5863806:skills/engineering/codebase-design",
+      "license": "MIT",
+      "author": "Matt Pocock",
+      "agents": [
+        "frontend",
+        "backend"
+      ],
+      "changes": "Mentions sub-agents; Codex runs have none, so the agent does those steps itself."
+    },
+    "openai-security-best-practices": {
+      "source": "trailofbits/skills-curated@6d05be4:plugins/openai-security-best-practices/skills/openai-security-best-practices",
+      "license": "Apache-2.0 (plugin); repo CC BY-SA 4.0",
+      "author": "OpenAI via Trail of Bits curated",
+      "agents": [
+        "backend",
+        "frontend",
+        "security"
+      ],
+      "changes": "Overrides section rewritten so project docs never suppress findings; Fixes section limited to tasks that ask for fixes (reviewers and auditors report only)."
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills@c9be0e9:skills/supabase-postgres-best-practices",
+      "license": "MIT",
+      "author": "Supabase",
+      "agents": [
+        "backend"
+      ]
+    },
+    "aws-cdk": {
+      "source": "aws/agent-toolkit-for-aws@94c87f7:skills/core-skills/aws-cdk",
+      "license": "Apache-2.0",
+      "author": "AWS",
+      "agents": [
+        "backend"
+      ]
+    },
+    "aws-iam": {
+      "source": "aws/agent-toolkit-for-aws@94c87f7:skills/core-skills/aws-iam",
+      "license": "Apache-2.0",
+      "author": "AWS",
+      "agents": [
+        "backend"
+      ],
+      "changes": "Removed references/aws-iam-policy-generation.md (forces an unpinned uvx tool and tells the agent not to ask permission); patched role creation to always ask."
+    },
+    "aws-containers": {
+      "source": "aws/agent-toolkit-for-aws@94c87f7:skills/core-skills/aws-containers",
+      "license": "Apache-2.0",
+      "author": "AWS",
+      "agents": [
+        "backend"
+      ]
+    },
+    "aws-compute": {
+      "source": "aws/agent-toolkit-for-aws@94c87f7:skills/core-skills/aws-compute",
+      "license": "Apache-2.0",
+      "author": "AWS",
+      "agents": [
+        "backend"
+      ]
+    },
+    "cloudfront": {
+      "source": "aws/agent-toolkit-for-aws@94c87f7:skills/specialized-skills/networking-and-content-delivery-skills/cloudfront",
+      "license": "Apache-2.0",
+      "author": "AWS",
+      "agents": [
+        "backend"
+      ]
+    },
+    "langgraph-fundamentals": {
+      "source": "langchain-ai/langchain-skills@32d6228:config/skills/langgraph-fundamentals",
+      "license": "MIT",
+      "author": "LangChain",
+      "agents": [
+        "backend"
+      ]
+    },
+    "langchain-fundamentals": {
+      "source": "langchain-ai/langchain-skills@32d6228:config/skills/langchain-fundamentals",
+      "license": "MIT",
+      "author": "LangChain",
+      "agents": [
+        "backend"
+      ]
+    },
+    "audit-xls": {
+      "source": "anthropics/financial-services@3e32c22:plugins/vertical-plugins/financial-analysis/skills/audit-xls",
+      "license": "Apache-2.0",
+      "author": "Anthropic",
+      "agents": [
+        "cfo"
+      ]
+    },
+    "variance-commentary": {
+      "source": "anthropics/financial-services@3e32c22:plugins/vertical-plugins/fund-admin/skills/variance-commentary",
+      "license": "Apache-2.0",
+      "author": "Anthropic",
+      "agents": [
+        "cfo"
+      ],
+      "note": "Expects an internal-gl MCP that does not exist here: work from CSV exports and Paperclip cost data instead."
+    },
+    "unit-economics": {
+      "source": "anthropics/financial-services@3e32c22:plugins/vertical-plugins/private-equity/skills/unit-economics",
+      "license": "Apache-2.0",
+      "author": "Anthropic",
+      "agents": [
+        "cfo"
+      ]
+    },
+    "product-marketing": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/product-marketing",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ]
+    },
+    "content-strategy": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/content-strategy",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ]
+    },
+    "copywriting": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/copywriting",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ]
+    },
+    "seo-audit": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/seo-audit",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ]
+    },
+    "ai-seo": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/ai-seo",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ],
+      "note": "Skip its npx-based checks (no runtime installs in the sandbox)."
+    },
+    "social": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/social",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ],
+      "note": "Drafts only: never post, log in, or send messages."
+    },
+    "emails": {
+      "source": "coreyhaines31/marketingskills@1f83744:skills/emails",
+      "license": "MIT",
+      "author": "Corey Haines",
+      "agents": [
+        "marketing"
+      ],
+      "note": "Drafts only: never send."
+    },
+    "openai-security-threat-model": {
+      "source": "trailofbits/skills-curated@6d05be4:plugins/openai-security-threat-model/skills/openai-security-threat-model",
+      "license": "Apache-2.0 (plugin); repo CC BY-SA 4.0",
+      "author": "OpenAI via Trail of Bits curated",
+      "agents": [
+        "security"
+      ],
+      "note": "For occasional deliberate runs; it pauses for input, so not for the nightly routine."
+    },
+    "security-awareness": {
+      "source": "trailofbits/skills-curated@6d05be4:plugins/security-awareness/skills/security-awareness",
+      "license": "MIT (1Password); repo CC BY-SA 4.0",
+      "author": "1Password via Trail of Bits curated",
+      "agents": [
+        "hermes",
+        "backend",
+        "frontend",
+        "marketing",
+        "cfo",
+        "qa",
+        "security",
+        "research-1",
+        "research-2",
+        "contractor-1",
+        "contractor-2"
+      ]
+    },
+    "writing-for-agents": {
+      "source": "mattpocock/skills@5863806:skills/productivity/writing-for-agents",
+      "license": "MIT",
+      "author": "Matt Pocock",
+      "agents": [
+        "hermes"
+      ]
+    },
+    "startup-finance": {
+      "source": "custom (agent-office)",
+      "license": "MIT",
+      "author": "Agent Office",
+      "agents": [
+        "cfo"
+      ]
+    },
+    "news-site-editorial": {
+      "source": "custom (agent-office)",
+      "license": "MIT",
+      "author": "Agent Office",
+      "agents": [
+        "marketing"
+      ]
+    },
+    "nightly-security-review": {
+      "source": "custom (agent-office)",
+      "license": "MIT",
+      "author": "Agent Office",
+      "agents": [
+        "security"
+      ]
+    }
+  }
+}
