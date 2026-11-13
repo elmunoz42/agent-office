@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 # Host-side headless browser for sandboxed Paperclip agents (QA).
 # Agents cannot launch a browser inside the Codex sandbox, but they can reach
 # localhost, so they connect to this Playwright server instead:

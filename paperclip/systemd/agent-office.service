@@ -1,0 +1,13 @@
+# The walkable office UI at http://127.0.0.1:5183 (proxies /paperclip to :3100)
+[Unit]
+Description=Agent Office UI (vite)
+
+[Service]
+WorkingDirectory=%h/dev/agent-office
+Environment=PATH=%h/.nvm/versions/node/v24.20.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/dev/agent-office/node_modules/.bin/vite --host 127.0.0.1 --port 5183 --strictPort
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,12 @@
+# Headless Playwright server for sandboxed QA agents: ws://127.0.0.1:9323/pw
+[Unit]
+Description=SEN QA browser (Playwright server)
+
+[Service]
+Environment=PATH=%h/.nvm/versions/node/v24.20.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/dev/agent-office/paperclip/qa/browser-service.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

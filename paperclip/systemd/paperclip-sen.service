@@ -1,0 +1,17 @@
+# Space Exploration News Paperclip instance (Linux host). Loopback only:
+# reach it from a laptop through an SSH tunnel (ssh -L 3100:127.0.0.1:3100).
+[Unit]
+Description=Paperclip (Space Exploration News)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/dev/agent-office/paperclip
+Environment=PAPERCLIP_HOME=%h/.paperclip-sen
+Environment=PATH=%h/dev/agent-office/paperclip/node_modules/.bin:%h/.local/bin:%h/.nvm/versions/node/v24.20.0/bin:/usr/local/bin:/usr/bin:/bin
+UMask=0022
+ExecStart=%h/dev/agent-office/paperclip/node_modules/.bin/paperclipai run --instance default
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

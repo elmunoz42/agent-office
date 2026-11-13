@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 # Host-side app server for the project agents work in, so they can browser-test
 # at http://127.0.0.1:3000 (agents cannot start servers inside the sandbox).
 #
@@ -14,12 +14,14 @@ pid=""; current=""
 trap '[[ -n "$pid" ]] && kill "$pid" 2>/dev/null; exit 0' INT TERM
 newest() {
   local best="" best_t=0 d t
-  for d in "$PROJECT" "$WORKTREES"/*(N/); do
+  shopt -s nullglob
+  for d in "$PROJECT" "$WORKTREES"/*/; do
+    d="${d%/}"
     [[ -f "$d/.next/BUILD_ID" && -d "$d/node_modules" ]] || continue
-    t=$(stat -f %m "$d/.next/BUILD_ID")
+    t=$(stat -c %Y "$d/.next/BUILD_ID" 2>/dev/null || stat -f %m "$d/.next/BUILD_ID")
     if (( t > best_t )); then best_t=$t; best=$d; fi
   done
-  print -r -- "$best"
+  printf "%s\n" "$best"
 }
 while true; do
   dir=$(newest)

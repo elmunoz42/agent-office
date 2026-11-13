@@ -1,0 +1,12 @@
+# Serves the most recently built sen-app checkout at http://127.0.0.1:3000
+[Unit]
+Description=SEN QA app server (newest build)
+
+[Service]
+Environment=PATH=%h/.nvm/versions/node/v24.20.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/dev/agent-office/paperclip/qa/app-service.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
