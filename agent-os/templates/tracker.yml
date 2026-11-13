@@ -1,0 +1,10 @@
+# Agent OS tracker config. Read by the shape-slice and verify-stories skills.
+# The tracker owns tasks: plan, owner, status, dependencies. Slices only link to it.
+#
+# type: paperclip | none | github | linear | ...
+# Leave empty and agents detect it (Paperclip when running inside a Paperclip
+# run, otherwise none) and save the answer here.
+type:
+
+# Optional, for humans and links. Example for Paperclip: http://localhost:3100/SPA/issues/
+url:

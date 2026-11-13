@@ -1,0 +1,169 @@
+<img width="1200" height="675" alt="Agent OS" src="https://github.com/user-attachments/assets/97ad4491-d199-4b9b-9482-ae710291dfb4" />
+
+## This branch: Agent OS 3.2 with slices (`paperclip`)
+
+Spec folders are replaced by **slices**: one short file per piece of work in `agent-os/slices/` that says what a user gets and why, lists its user stories, and names its task in the project tracker (for example a [Paperclip](https://paperclip.ing) issue). The plan, owner, status and dependencies stay in the tracker; nothing is copied back into the repository. Without a tracker, the slice file carries a short plan itself. In a project the folder is still `agent-os/`.
+
+| Fact | Lives in |
+|---|---|
+| What and why, scope, decisions | `agent-os/slices/SL-###-slug.md` |
+| Plan, owner, status, dependencies, review | the tracker task (`tracker: SPA-31`) |
+| What working means | `agent-os/user-stories/`, checked by `/verify-stories` |
+
+**Prototype first, process after.** `/prototype` is the one sanctioned bypass: a throwaway first pass at an idea in `prototypes/`, with no slice, stories or tests. Nothing in it ships and only the person who asked can validate it; once they do, `/graduate-prototype` shapes the slice and stories from what was approved, lists everything the prototype faked or skipped, and creates the build, review, security and QA tasks in the tracker. `/grill-me-with-docs` interviews you (or the board, over several rounds on a tracker task) until a plan is settled, writing the glossary and decision records as it goes. `/code-review` and `/diagnose-bug` round out the build side. These four are adapted from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT). To give a skill to one agent only (for example prototype to a CEO agent in Paperclip), install with `--without prototype,grill-me-with-docs` and add those two as company skills for that agent.
+
+Upgrading a project that has `agent-os/specs/`: see [UPGRADING.md](UPGRADING.md). Everything below also applies to this branch unless it mentions specs.
+
+## The fork: Agent OS 3.1-fork
+
+Fork of Agent OS v3 by Builder Methods, modernized for Claude Code, Codex, and Cursor, with user stories that agents verify in a real browser and harden into Playwright tests. Fully backward compatible with existing v3 projects, with a migration path for v2.
+
+**What's added**
+
+- **Agent Skills for three tools.** Every command is a valid Agent Skill. Skills install once to `.agents/skills/` (Codex, Cursor) and are linked into `.claude/skills/` (Claude Code). `AGENTS.md` gets a managed agent-os block; `CLAUDE.md` imports it.
+- **User stories.** `agent-os/user-stories/` holds long lived stories with Given/When/Then acceptance criteria and an `index.yml`.
+- **Browser verified stories.** `/verify-stories` starts your app, walks each acceptance criterion in a real browser (playwright-cli by default), runs unit tests, then hardens passing checks into committed Playwright tests tagged `@US-###`.
+- **PRD Creator integration.** Installs the Builder Methods [PRD Creator](https://github.com/buildermethods/bm-skills) as a dependency; `/prd-to-stories` turns its milestones into stories and wires milestone verification.
+- **Security review.** Optionally installs Cloudflare's [security-audit](https://github.com/cloudflare/security-audit-skill) skill. At production level, agents run a focused review of changed code before calling work done, and each fixed finding becomes an `(edge)` story criterion with a regression test.
+- **Safe upgrades.** `migrate.sh` upgrades one project or a whole folder of repos, on a branch, with dry run and rollback. Standards and product docs are never modified; old spec files are moved to `agent-os/archive/specs/` unedited.
+
+### Install
+
+```bash
+git clone https://github.com/elmunoz42/agent-os.git ~/agent-os
+cd /path/to/your/project
+~/agent-os/scripts/project-install.sh --with prd,security
+```
+
+Useful flags: `--level demo|production`, `--tools claude,codex,cursor` (default all), `--copy` (no symlinks, for Windows), `--commands-only` (keep standards), `--dry-run`, `--yes`.
+
+### External skills
+
+Agent OS pulls in two third-party skills as optional dependencies. They are never vendored or edited, and each is pinned to a tested commit:
+
+| `--with` id | Skill | From | Used for |
+|---|---|---|---|
+| `prd` | bm-prd-creator | [Builder Methods](https://github.com/buildermethods/bm-skills) (MIT) | Planning new apps; `/prd-to-stories` turns milestones into stories |
+| `security` | security-audit | [Cloudflare](https://github.com/cloudflare/security-audit-skill) (MIT) | Focused review before done at production level; full audits on request |
+
+```bash
+project-install.sh --with prd,security        # or --with-prd / --with-security
+project-install.sh --with security --security-ref main   # track upstream instead of the pin
+migrate.sh --scan ~/code --apply --branch agent-os-3.1 --with security
+```
+
+Each installed copy records its source repo and commit in `.agent-os-managed`. To update the pins, change `EXTERNAL_SKILLS` in `scripts/lib/install-lib.sh` after testing. The security skill's full audit mode needs Node.js, and a sandbox if it is to run target code. Its reports go outside the repo by default.
+
+### Upgrade existing projects
+
+```bash
+~/agent-os/scripts/migrate.sh                       # dry run in the current project
+~/agent-os/scripts/migrate.sh --apply
+~/agent-os/scripts/migrate.sh --scan ~/code         # list every Agent OS project and its version
+~/agent-os/scripts/migrate.sh --scan ~/code --apply --branch agent-os-3.1
+~/agent-os/scripts/migrate.sh --rollback
+```
+
+See [UPGRADING.md](UPGRADING.md) for details.
+
+### Using it in each tool
+
+| | Claude Code | Codex | Cursor |
+|---|---|---|---|
+| Skills read from | `.claude/skills/` (linked) | `.agents/skills/` | `.agents/skills/` (also reads `.claude/skills/`) |
+| Instructions | `CLAUDE.md` imports `AGENTS.md` | `AGENTS.md` | `AGENTS.md` |
+| Invoke | `/verify-stories US-012` | `$verify-stories US-012` or `/skills` | `/verify-stories US-012` |
+| Plan mode for /shape-slice | Plan mode | Plan mode if available, else read only approvals | Plan mode |
+
+Cursor reads both skill folders and resolves the symlinks, so with the default install each skill appears once (verified with Cursor's own runtime, see Tests). With `--copy`, the copies are separate files and Cursor lists each skill twice; prefer symlinks (on Windows, enable Developer Mode and `git config core.symlinks true`), or use `--tools codex,cursor` where you don't need Claude Code.
+
+Claude Code users can also install the skills globally as a plugin: `/plugin marketplace add elmunoz42/agent-os`, then `/plugin install agent-os`. You still run `project-install.sh` once per project to scaffold `agent-os/`.
+
+### Workflow
+
+1. `/plan-product` (or `/bm-prd-creator` for a new app, then `/prd-to-stories`)
+2. `/discover-standards`, `/inject-standards`
+3. `/shape-slice` writes the slice, links or writes stories, saves the plan to the tracker task, and ends every plan with a verification step
+4. Build
+5. `/verify-stories slice:SL-007` (or a tracker task ID, `prd-m1`, a story ID, a tag); the result is posted to the tracker task
+
+### Demo or production testing
+
+Every project has a testing level in `agent-os/testing.yml`:
+
+| | demo | production |
+|---|---|---|
+| For | Customer demos, prototypes | Code that ships |
+| Stories and ACs | Happy path only | Happy path plus `(edge)` cases |
+| Playwright tests | One happy path test per story, `@demo` | One per AC, `@demo` and `@prod` |
+| Speed | Fast, moderate checks | Thorough |
+
+Stories carry `sets: [demo, production]`, or `[production]` for edge-only stories, and edge ACs are tagged `(edge)`. Agents read the level, and if it's empty they ask once and save the answer. Set it up front with `project-install.sh --level demo` (or `production`), or override one run with `/verify-stories --level production`. Moving a demo to production keeps every story and adds the edge cases. Run `npx playwright test --grep @demo` before a demo, and `--grep @US` for everything.
+
+### Story status report
+
+```bash
+python3 .agents/skills/verify-stories/scripts/stories_report.py            # in a project
+python3 .agents/skills/verify-stories/scripts/stories_report.py --set demo # demo set only
+```
+
+This prints a one-line summary plus any failing stories, and writes `agent-os/user-stories/report.html`: a static page showing each story's status, verification level, sets, criteria counts, test files (missing ones are flagged) and last verified date. It has no dependencies beyond Python 3, works in light and dark mode, and is gitignored. verify-stories refreshes it after every run.
+
+See `examples/sample-app/` for stories, a real verification report with screenshots, and story tagged Playwright tests, including a known failing story.
+
+### Tests
+
+```bash
+tests/run.sh               # installer, migration, rollback, batch, skill validation
+tests/run.sh --e2e         # plus the sample app's Playwright story tests
+tests/compat.sh            # checks against the real tools (see below)
+tests/compat.sh --claude-e2e   # plus Claude Code running /verify-stories on the sample app
+```
+
+`tests/compat.sh` checks each tool with its own code (CI runs the Codex and Cursor checks on every push):
+
+- Claude Code: the claude CLI lists all installed skills and loads AGENTS.md through the CLAUDE.md import.
+- Codex: `codex debug prompt-input` (no login needed) shows every skill discovered from `.agents/skills` and the AGENTS.md block in the model input.
+- Cursor: runs Cursor's own local runtime from the official `@cursor/sdk` package (no API key needed) on an installed project and checks that it loads AGENTS.md and CLAUDE.md as project rules and every skill exactly once, with no parse errors or warnings, for both the default install and `--tools codex,cursor`.
+
+---
+
+## Agents that build the way you would
+
+[Agent OS](https://buildermethods.com/agent-os) helps you shape better specs, keeps agents aligned in a lightweight system that fits how you already build.
+
+Works alongside Claude Code, Cursor, Antigravity, and other AI tools. Any language, any framework.
+
+**Core capabilities:**
+
+- **Discover Standards** — Extract patterns and conventions from your codebase into documented standards
+- **Deploy Standards** — Intelligently inject relevant standards based on what you're building
+- **Shape Spec** — Create better plans that lead to better builds
+- **Index Standards** — Keep your standards organized and discoverable
+
+---
+
+### Documentation & Installation
+
+Docs, installation, usage, & best practices 👉 [It's all here](https://buildermethods.com/agent-os)
+
+---
+
+### Follow updates & releases
+
+Read the [changelog](CHANGELOG.md)
+
+[Subscribe to be notified of major new releases of Agent OS](https://buildermethods.com/agent-os)
+
+---
+
+### Created by Brian Casel @ Builder Methods
+
+Created by Brian Casel, the creator of [Builder Methods](https://buildermethods.com), where Brian helps professional software developers and teams build with AI.
+
+Get Brian's free resources on building with AI:
+- [Builder Briefing newsletter](https://buildermethods.com)
+- [YouTube](https://youtube.com/@briancasel)
+
+Join [Builder Methods Pro](https://buildermethods.com/pro) for official support and connect with our community of AI-first builders:
+

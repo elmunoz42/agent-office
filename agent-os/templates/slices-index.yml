@@ -1,0 +1,9 @@
+# Agent OS Slices Index
+# Maintained by the shape-slice skill. One entry per slice file in this folder.
+# A slice says what a user gets and why, and points to its tracker task.
+#
+# SL-001:
+#   file: SL-001-invite-teammates-by-email.md
+#   title: "Invite teammates by email"
+#   tracker: SPA-31      # task ID in the project tracker; empty if none
+#   stories: [US-011, US-012]

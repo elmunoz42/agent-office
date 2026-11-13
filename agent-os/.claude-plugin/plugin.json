@@ -1,0 +1,15 @@
+{
+  "name": "agent-os",
+  "displayName": "Agent OS (3.2, slices)",
+  "description": "Agent OS standards, slices linked to tracker tasks, user stories, and browser verified story tests. Fork of buildermethods/agent-os.",
+  "version": "3.2.0",
+  "author": {
+    "name": "elmunoz42",
+    "url": "https://github.com/elmunoz42"
+  },
+  "homepage": "https://github.com/elmunoz42/agent-os",
+  "repository": "https://github.com/elmunoz42/agent-os",
+  "license": "MIT",
+  "commands": ["./commands/agent-os"],
+  "skills": ["./skills"]
+}
