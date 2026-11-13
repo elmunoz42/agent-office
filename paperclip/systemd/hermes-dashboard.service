@@ -6,6 +6,11 @@ Description=Hermes web dashboard and chat
 
 [Service]
 Environment=HERMES_HOME=%h/.hermes
+# The chat is you (the board) talking to Hermes, not a Paperclip run, so give it
+# the board's view of Paperclip. Paperclip is local_trusted on loopback: these
+# calls act as the board, with full rights.
+Environment=PAPERCLIP_API_URL=http://127.0.0.1:3100
+Environment=PAPERCLIP_COMPANY_ID=d626a9c6-cd89-42e8-a094-cb5710b25bfd
 Environment=PATH=%h/.hermes/hermes-agent/venv/bin:%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=%h/.hermes/hermes-agent/venv/bin/python %h/.hermes/hermes-agent/hermes dashboard --host 127.0.0.1 --port 9119 --no-open --skip-build
 Restart=on-failure
