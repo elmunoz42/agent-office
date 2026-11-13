@@ -307,6 +307,15 @@
       "agents": [
         "security"
       ]
+    },
+    "artcraft-generate": {
+      "source": "custom (agent-office), based on storytold/artcraft@84a6a7d:_docs/artcraft_omni_api.md",
+      "license": "MIT",
+      "author": "Agent Office",
+      "agents": [
+        "marketing"
+      ],
+      "note": "Needs the ARTCRAFT_API_KEY Paperclip secret bound to Erlich's env. Spends credits: generates only with a board-approved count."
     }
   }
 }
