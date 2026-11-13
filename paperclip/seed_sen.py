@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 
 API = os.environ.get("PAPERCLIP_API_URL", "http://localhost:3100") + "/api"
-WORKSPACE = os.path.expanduser("~/Desktop/dev/space-exploration-news/sen-app")  # agents work in the real checkout (owner's choice)
+WORKSPACE = os.path.expanduser("~/dev/space-exploration-news/sen-app")  # agents work in the real checkout (owner's choice)
 COMPANY = "Space Exploration News"
 
 
@@ -87,21 +87,27 @@ print("goals", len(goal_id))
 # ---------------------------------------------------------------- agents
 # officeId ties each agent to a desk in the 3D office (agent-office/src/data.js).
 TEAM = [
-    ("hermes", "Hermes", "ceo", "CEO", "crown",
+    ("hermes", "Richard", "ceo", "CEO", "crown",
      "Owns the roadmap and priorities for Space Exploration News. Breaks goals into issues, "
      "delegates to the team, and escalates anything that publishes, spends or deploys to the board."),
-    ("backend", "Soren Black", "engineer", "Senior Backend Dev", "database",
+    ("backend", "Gilfoyle", "engineer", "Senior Backend Dev", "database",
      "Headless WordPress REST backend (celestial-body and mission post types, ACF), the Next.js "
      "API routes in sen-app that proxy it, and deployment."),
-    ("frontend", "Kiran Mehta", "engineer", "Senior Frontend Dev", "telescope",
+    ("frontend", "Dinesh", "engineer", "Senior Frontend Dev", "telescope",
      "sen-app frontend: Next.js, React Three Fiber solar system, detail sidebar, content pages, "
      "multilingual routing, visual QA."),
-    ("marketing", "Ezra Blum", "cmo", "Marketing", "sparkles",
+    ("marketing", "Erlich", "cmo", "Marketing", "sparkles",
      "Content calendar across the five content pillars, post and newsletter drafts, podcast and "
      "video script reuse. Drafts only; the board approves anything that publishes."),
-    ("cfo", "Wendell Park", "cfo", "CFO", "gem",
+    ("cfo", "Jared", "cfo", "CFO", "gem",
      "Cost model for hosting, tooling and agent spend; revenue planning for the WooCommerce merch "
      "store, sponsorships and affiliates."),
+    ("qa", "Carla", "qa", "QA", "bug",
+     "Tests sen-app before anything ships: reproduces bugs, runs lint, build and browser checks, "
+     "writes test plans and regression notes, and reports what is and is not verified."),
+    ("security", "Jian-Yang", "security", "Cyber Security", "shield",
+     "Security review: dependency and secret scanning, access and credential hygiene, WordPress and "
+     "Vercel hardening. Reports findings; never rotates or reveals credentials without board approval."),
     ("contractor-1", "Juno", "engineer", "Contract Dev", "code",
      "General implementation tickets handed down by the senior developers."),
     ("contractor-2", "Tabs", "engineer", "Contract Dev", "code",
