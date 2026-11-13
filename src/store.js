@@ -8,6 +8,7 @@
 //   - demo: when Paperclip isn't reachable, seeded tasks in localStorage.
 import { AGENTS, SEED_TASKS, agentById } from './data.js';
 import { DEFAULT_ROWS, parseRegistry, serializeRegistry } from './registry.js';
+import { routineRow, DEMO_ROUTINES } from './routines.js';
 
 const KEY = 'agent-office-v1';
 const DATES_KEY = 'agent-office-dates-v1';
@@ -42,6 +43,7 @@ const local = saved && Array.isArray(saved.tasks) ? saved : seed();
 let remote = null;
 let remoteTasks = [];
 let remoteSig = '';
+let remoteRoutines = [];
 // Server-room lookup table. Connected: the Paperclip document; otherwise local.
 let registry = { rows: readJson(REGISTRY_KEY) ?? DEFAULT_ROWS, info: null, pre: undefined, post: '' };
 const dates = readJson(DATES_KEY) || {};
@@ -80,7 +82,9 @@ function commitLocal() { writeJson(KEY, local); emit(); }
 
 async function refresh() {
   if (!remote) return;
-  const [agents, issues] = await Promise.all([remote.listAgents(), remote.listIssues()]);
+  const [agents, issues, routines] = await Promise.all([
+    remote.listAgents(), remote.listIssues(), remote.listRoutines().catch(() => null),
+  ]);
   const byRemoteId = new Map();
   for (const a of AGENTS) a.remote = null;
   for (const ra of agents) {
@@ -96,7 +100,9 @@ async function refresh() {
   registry = reg
     ? { ...parseRegistry(reg.body), info: { issueId: reg.issueId, ref: reg.ref, revisionId: reg.revisionId, revision: reg.revision } }
     : { rows: [], info: null, pre: undefined, post: '' };
-  const sig = JSON.stringify([tasks, AGENTS.map((a) => a.remote), registry.rows, registry.info?.revisionId]);
+  const nameOf = (rid) => byRemoteId.get(rid)?.name ?? null;
+  if (routines) remoteRoutines = routines.filter((r) => r.status !== 'archived').map((r) => routineRow(r, nameOf));
+  const sig = JSON.stringify([tasks, AGENTS.map((a) => a.remote), registry.rows, registry.info?.revisionId, remoteRoutines]);
   remoteTasks = tasks;
   if (sig !== remoteSig) { remoteSig = sig; emit(); }
 }
@@ -188,6 +194,9 @@ export const store = {
     // Cancel rather than hard-delete, so the issue and its history stay in Paperclip.
     await write(() => { remoteTasks = remoteTasks.filter((t) => t.id !== id); }, () => remote.patchIssue(id, { status: 'cancelled' }));
   },
+
+  // ---- recurring tasks (garage display) ----
+  get routines() { return remote ? remoteRoutines : DEMO_ROUTINES; },
 
   // ---- server-room registry ----
   get registry() { return registry.rows; },

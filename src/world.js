@@ -409,10 +409,62 @@ export function buildWorld(scene) {
   };
   drawStatus(0);
 
-  let lastLed = 0, lastStatus = 0, ledIdx = 0;
+  // Recurring tasks board: Paperclip routines (nightly audit, research brief,
+  // weekly finance report...) on the east wall, north of the cluster screen.
+  const ROUTINE_COLORS = { active: '#34e27a', running: '#2c9bff', paused: '#8b93a1' };
+  const routineTex = canvasTex(1024, 640);
+  const routineMesh = mesh(new THREE.PlaneGeometry(2.6, 1.625), new THREE.MeshBasicMaterial({ map: routineTex }), 13.88, 1.62, 0.25);
+  routineMesh.rotation.y = -Math.PI / 2; scene.add(routineMesh);
+  B(0.06, 1.74, 2.72, M.black, 13.92, 1.62, 0.25);
+  let routineRows = [];
+  let untilFn = () => '';
+  const drawRoutines = () => {
+    const c = routineTex.image.getContext('2d');
+    c.fillStyle = '#06101c'; c.fillRect(0, 0, 1024, 640);
+    c.fillStyle = '#ffb020'; c.fillRect(0, 0, 1024, 8);
+    c.textAlign = 'left';
+    c.fillStyle = '#ffb020'; c.font = '700 40px ui-monospace, Menlo, monospace';
+    c.fillText('RECURRING TASKS', 32, 62);
+    c.fillStyle = '#5f7391'; c.font = '22px ui-monospace, Menlo, monospace';
+    c.textAlign = 'right'; c.fillText(`${routineRows.length} routine${routineRows.length === 1 ? '' : 's'}`, 992, 60);
+    c.textAlign = 'left';
+    if (!routineRows.length) {
+      c.fillStyle = '#8fb8e8'; c.font = '28px system-ui, sans-serif';
+      c.fillText('No routines yet. Add one in Paperclip → Routines.', 32, 140);
+    }
+    const shown = routineRows.slice(0, 6);
+    const rowH = Math.min(132, Math.floor(540 / Math.max(shown.length, 1)));
+    shown.forEach((r, i) => {
+      const y = 92 + i * rowH;
+      c.fillStyle = i % 2 ? '#0b1626' : '#0e1b2e'; c.fillRect(20, y, 984, rowH - 10);
+      c.fillStyle = ROUTINE_COLORS[r.status] ?? ROUTINE_COLORS.paused; c.fillRect(20, y, 8, rowH - 10);
+      c.beginPath(); c.arc(56, y + 36, 11, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#fff'; c.font = '700 30px system-ui, sans-serif';
+      c.fillText(fit(c, r.title, 600), 82, y + 46);
+      c.fillStyle = '#9fb0cc'; c.font = '24px system-ui, sans-serif';
+      if (rowH > 80) c.fillText(fit(c, `${r.agent} · ${r.schedule}`, 600), 82, y + 84);
+      c.textAlign = 'right';
+      const next = r.status === 'running' ? 'running now' : r.status === 'paused' ? 'paused' : untilFn(r.nextRunAt) || '—';
+      c.fillStyle = r.status === 'running' ? '#2c9bff' : r.status === 'paused' ? '#8b93a1' : '#34e27a';
+      c.font = '700 30px ui-monospace, Menlo, monospace'; c.fillText(next, 990, y + 46);
+      c.fillStyle = '#5f7391'; c.font = '22px ui-monospace, Menlo, monospace';
+      if (rowH > 80) c.fillText(fit(c, `last: ${r.last}`, 300), 990, y + 84);
+      c.textAlign = 'left';
+    });
+    if (routineRows.length > shown.length) {
+      c.fillStyle = '#5f7391'; c.font = '22px ui-monospace, Menlo, monospace';
+      c.fillText(`+ ${routineRows.length - shown.length} more in Paperclip`, 32, 628);
+    }
+    routineTex.needsUpdate = true;
+  };
+  drawRoutines();
+
+  let lastLed = 0, lastStatus = 0, lastRoutines = 0, ledIdx = 0;
   return {
     colliders,
     setStatus(info) { statusInfo = info; },
+    /** Rows from routines.js routineRow(); `until(iso)` formats the countdown. */
+    setRoutines(rows, until) { routineRows = rows; untilFn = until; drawRoutines(); },
     setRacks,
     /** The rack the player is standing in front of, if any. */
     rackNear(x, z) {
@@ -424,6 +476,7 @@ export function buildWorld(scene) {
     update(t) {
       if (racks.length && t - lastLed > 0.2) { lastLed = t; drawLedStrip(racks[ledIdx++ % racks.length]); }
       if (t - lastStatus > 0.25) { lastStatus = t; drawStatus(t); }
+      if (t - lastRoutines > 15) { lastRoutines = t; drawRoutines(); } // keep countdowns fresh
     },
   };
 }

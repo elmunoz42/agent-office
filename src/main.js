@@ -7,6 +7,7 @@ import { buildStation, buildSharedBoard } from './stations.js';
 import { initUI } from './ui.js';
 import { connectPaperclip } from './paperclip.js';
 import { groupRacks, brandColor, STATUS_COLORS } from './registry.js';
+import { untilText } from './routines.js';
 import { wrapAngle } from './util.js';
 
 const $ = (id) => document.getElementById(id);
@@ -51,6 +52,7 @@ const researchBoard = buildSharedBoard(AGENTS.filter((a) => a.researchSlot), { x
 scene.add(researchBoard.group);
 
 let rackSig = null;
+let lastRoutineSig = null;
 function syncStore() {
   // rebuild the server racks only when the registry actually changed
   const sig = JSON.stringify(store.registry);
@@ -69,6 +71,8 @@ function syncStore() {
     doing: tasks.filter((t) => t.status === 'doing').length,
     blocked: tasks.filter((t) => t.blocked && t.status !== 'done').length,
   });
+  const routineSig = JSON.stringify(store.routines);
+  if (routineSig !== lastRoutineSig) { lastRoutineSig = routineSig; world.setRoutines(store.routines, untilText); }
   $('c-count').textContent = store.contractors;
 }
 store.subscribe(syncStore);

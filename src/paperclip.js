@@ -68,6 +68,7 @@ export async function connectPaperclip() {
     isChatIssue: (issue) => issue.title?.startsWith(CHAT_PREFIX),
     listAgents: () => api('GET', `/companies/${cid}/agents`),
     listIssues: () => api('GET', `/companies/${cid}/issues`),
+    listRoutines: () => api('GET', `/companies/${cid}/routines`),
     createIssue: (body) => api('POST', `/companies/${cid}/issues`, body),
     patchIssue: (id, body) => api('PATCH', `/issues/${id}`, body),
 
