@@ -126,7 +126,8 @@ export const store = {
   },
   refresh,
 
-  isActive: (agent) => (remote ? !!agent.remote : !agent.slot || agent.slot <= local.contractors),
+  isActive: (agent) => (remote ? !!agent.remote
+    : (!agent.slot || agent.slot <= local.contractors) && (!agent.researchSlot || agent.researchSlot === 1)),
   activeAgents: () => AGENTS.filter((a) => store.isActive(a)),
   harness: (agent) => (remote && agent.remote
     ? `Paperclip · ${agent.remote.harness} · ${agent.remote.status}`

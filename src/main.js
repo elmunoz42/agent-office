@@ -3,7 +3,7 @@ import './style.css';
 import { buildWorld, ROOMS } from './world.js';
 import { AGENTS } from './data.js';
 import { store } from './store.js';
-import { buildStation } from './stations.js';
+import { buildStation, buildSharedBoard } from './stations.js';
 import { initUI } from './ui.js';
 import { connectPaperclip } from './paperclip.js';
 import { groupRacks, brandColor, STATUS_COLORS } from './registry.js';
@@ -28,6 +28,7 @@ $('source').classList.toggle('live', !!store.remote);
 $('crew').classList.toggle('readonly', !!store.remote);
 let toastTimer = 0;
 store.onError((msg) => {
+  $('toast').classList.remove('info');
   $('toast').textContent = msg;
   $('toast').hidden = false;
   clearTimeout(toastTimer);
@@ -42,6 +43,12 @@ const stations = AGENTS.map((a) => {
   return s;
 });
 const stationOf = (id) => stations.find((s) => s.agent.id === id);
+// the contractors' Kanban hangs on the south wall, facing their table
+const contractorBoard = buildSharedBoard(AGENTS.filter((a) => a.slot), { x: -7.85, y: 1.55, z: 6.86, ry: Math.PI });
+scene.add(contractorBoard.group);
+// the researchers' Kanban hangs on the kitchen wall behind their table
+const researchBoard = buildSharedBoard(AGENTS.filter((a) => a.researchSlot), { x: 3.9, y: 1.55, z: 1.08, ry: 0 }, 'Research');
+scene.add(researchBoard.group);
 
 let rackSig = null;
 function syncStore() {
@@ -54,6 +61,8 @@ function syncStore() {
     s.colliders.forEach((c) => { c.on = on; });
     if (on) s.redraw();
   }
+  contractorBoard.redraw();
+  researchBoard.redraw();
   const tasks = store.activeTasks();
   world.setStatus({
     agents: store.activeAgents().length,

@@ -26,6 +26,7 @@ body.ui-open #lockhint { display: none; }
 #source { position: absolute; top: 60px; right: 16px; padding: 5px 11px; background: var(--glass); border: 1px solid var(--line); border-radius: 999px; font-size: 11px; color: var(--dim); white-space: nowrap; }
 #source::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: #8b93a1; }
 #source.live::before { background: #3ecf8e; }
+#toast.info { background: #10241a; border-color: rgba(62, 207, 142, 0.6); color: #c9f5dd; }
 #toast { position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%); z-index: 9; max-width: min(560px, calc(100vw - 32px)); padding: 10px 16px; background: #3a1418; border: 1px solid rgba(229, 72, 77, 0.6); border-radius: 10px; font-size: 13px; color: #ffd0d2; }
 body.talking #source { display: none; }
 #crew.readonly button { display: none; }
@@ -58,7 +59,8 @@ body.ui-open #crosshair, body.ui-open #prompt, body.ui-open #help, body.talking 
 .who b { white-space: nowrap; font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; }
 .who span { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
 #d-you { margin: 0 0 6px; font-size: 14px; color: #b9c6dc; font-style: italic; }
-#d-line { margin: 0; min-height: 3.2em; font-size: 20px; line-height: 1.45; text-wrap: pretty; }
+#d-line { margin: 0; min-height: 3.2em; max-height: 38vh; overflow-y: auto; font-size: 20px; line-height: 1.45; text-wrap: pretty; white-space: pre-line; overscroll-behavior: contain; }
+#d-line.long { font-size: 16px; }
 #d-mock { margin: 10px 0 0; font-size: 11px; color: var(--dim); letter-spacing: 0.04em; }
 .choices { position: absolute; right: 5vw; bottom: 13vh; width: min(38vw, 430px); padding: 14px 16px; background: linear-gradient(90deg, rgba(8, 12, 20, 0.55), rgba(8, 12, 20, 0.88)); border-left: 2px solid var(--accent); }
 #d-choices { margin: 0; padding: 0; list-style: none; }

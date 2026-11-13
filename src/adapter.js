@@ -67,11 +67,11 @@ function reply(agent, intent) {
     case 'money':
       return agent.id === 'cfo'
         ? "We have runway, provided nobody buys another rack for the garage. I'll send you the three scenarios."
-        : "That's a Wendell question. He's in the office past the living room, probably updating a spreadsheet.";
+        : "That's a Jared question. He's in the office past the living room, probably updating a spreadsheet.";
     case 'infra':
       return agent.id === 'backend'
         ? "The cluster in the garage is fine. It's always fine. I built it."
-        : 'Ask Soren. He treats the garage servers like pets.';
+        : 'Ask Gilfoyle. He treats the garage servers like pets.';
     default:
       return pick(v.fallback);
   }
@@ -79,7 +79,7 @@ function reply(agent, intent) {
 
 export const adapter = {
   /** @returns {Promise<{text: string, note: string}>} the reply and where it came from */
-  async chat(agent, { intent, text }) {
+  async chat(agent, { intent, text }, opts = {}) {
     if (!store.remote) {
       await sleep(350 + Math.random() * 450);
       return { text: reply(agent, intent ?? classify(text ?? '')), note: 'Simulated reply — Paperclip is not connected' };
@@ -88,6 +88,12 @@ export const adapter = {
       await sleep(250);
       return { text: reply(agent, intent), note: "Answered from this agent's live Paperclip issues (no agent run)" };
     }
-    return store.remote.chat(agent, text);
+    return store.remote.chat(agent, text, opts);
   },
+  /** A Paperclip reply this agent sent that was never shown in the office, or null. */
+  async missed(agent) {
+    if (!store.remote || !agent.remote) return null;
+    try { return await store.remote.missedReply(agent); } catch { return null; }
+  },
+  markSeen(agent, id) { if (store.remote && agent.remote && id) store.remote.markSeen(agent, id); },
 };

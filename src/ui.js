@@ -37,6 +37,7 @@ export function initUI({ onMode }) {
     let i = 0;
     el.textContent = '';
     el.dataset.full = text;
+    el.classList.toggle('long', text.length > 220); // real agent replies can be paragraphs
     typer = setInterval(() => {
       i += 2;
       el.textContent = text.slice(0, i);
@@ -51,6 +52,15 @@ export function initUI({ onMode }) {
     busy = b;
     $('d-choices').classList.toggle('busy', b);
   }
+  let noticeTimer = 0;
+  function notify(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('info');
+    t.hidden = false;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { t.hidden = true; t.classList.remove('info'); }, 9000);
+  }
   async function ask(label, payload) {
     if (busy) return;
     const token = convo;
@@ -59,12 +69,23 @@ export function initUI({ onMode }) {
     $('d-you').textContent = `You: ${label}`;
     setBusy(true);
     speak('…');
+    if (payload.text && store.remote) $('d-mock').textContent = `Sent to ${who.name} in Paperclip · waiting for the agent to run (usually about a minute)`;
+    const onProgress = ({ status, secs, ref }) => {
+      if (token !== convo) return;
+      $('d-role').textContent = `${who.role} · ${store.harness(who).replace(/ · [a-z_]+$/, '')} · ${status}`;
+      $('d-mock').textContent = `Waiting for ${who.name} · Paperclip ${ref} · ${status === 'running' ? 'working on it' : status} · ${secs}s`;
+    };
     let res;
-    try { res = await adapter.chat(who, payload); } catch (err) { res = { text: "(No reply — the agent bridge didn't answer.)", note: err.message || '' }; }
-    if (token !== convo) return;
+    try { res = await adapter.chat(who, payload, { onProgress }); } catch (err) { res = { text: "(No reply — the agent bridge didn't answer.)", note: err.message || '' }; }
+    if (token !== convo) {
+      // you walked off mid-wait: keep the reply for next time and say it arrived
+      if (res.live) notify(`${who.name} replied. Talk to ${who.name} again to read it.`);
+      return;
+    }
     setBusy(false);
     speak(res.text);
     $('d-mock').textContent = res.note ?? '';
+    adapter.markSeen(who, res.id);
   }
   function setTaskMode(on) {
     taskMode = on;
@@ -105,6 +126,15 @@ export function initUI({ onMode }) {
     renderChoices();
     speak(a.voice.greeting);
     setMode('dialogue');
+    // show a Paperclip reply that arrived after you left (or after a reload)
+    const token = convo;
+    adapter.missed(a).then((m) => {
+      if (!m || token !== convo || busy) return;
+      if (m.question) { $('d-you').hidden = false; $('d-you').textContent = `You asked: ${m.question}`; }
+      speak(m.text);
+      $('d-mock').textContent = m.note;
+      adapter.markSeen(a, m.id);
+    });
   }
   $('d-choices').addEventListener('click', (e) => {
     const li = e.target.closest('li');
@@ -379,6 +409,7 @@ export function initUI({ onMode }) {
   store.subscribe(() => {
     renderPanel();
     // pick up edits made in Paperclip while the table is open, unless there are unsaved changes here
+    if (mode === 'dialogue' && agent && !busy) $('d-role').textContent = `${agent.role} · ${store.harness(agent)}`;
     if (mode === 'registry' && !regDirty) { regDraft = store.registry.map((r) => ({ ...r })); renderRegistry(); }
     if (agent && !store.isActive(agent) && mode !== 'play') close();
   });

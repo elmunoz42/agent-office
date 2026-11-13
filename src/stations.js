@@ -14,10 +14,9 @@ const clip = (c, text, max) => {
   return `${t}…`;
 };
 
-function drawBoard(tex, agent) {
+function drawBoard(tex, agent, tasks = store.tasksFor(agent.id)) {
   const c = tex.image.getContext('2d');
   const W = tex.image.width, Hh = tex.image.height;
-  const tasks = store.tasksFor(agent.id);
   c.fillStyle = '#fbfaf5'; c.fillRect(0, 0, W, Hh);
   c.fillStyle = agent.color; c.fillRect(0, 0, W, 56);
   c.fillStyle = '#fff'; c.font = '700 30px system-ui, sans-serif'; c.textAlign = 'left';
@@ -75,28 +74,44 @@ export function buildStation(agent) {
   g.position.set(x, 0, z);
   g.rotation.y = ry;
 
+  const shared = !!agent.station.shared; // a spot at the shared table instead of a desk
   const deskM = mat(0xd8b88a), legM = mat(0x2a2d33, { metalness: 0.4, roughness: 0.5 }), dark = mat(0x17181c);
-  // standing desk
-  box(g, 1.6, 0.05, 0.75, deskM, 0, 1.03, 0.85);
-  for (const s of [-1, 1]) { box(g, 0.07, 1.0, 0.07, legM, s * 0.68, 0.5, 0.85); box(g, 0.08, 0.04, 0.65, legM, s * 0.68, 0.02, 0.85); }
-  // monitor (faces the agent) + keyboard + mug
   const screenTex = canvasTex(256, 176);
-  box(g, 0.62, 0.4, 0.03, dark, -0.38, 1.36, 1.05);
-  const screen = mesh(new THREE.PlaneGeometry(0.57, 0.35), new THREE.MeshBasicMaterial({ map: screenTex }), -0.38, 1.36, 1.033);
-  screen.rotation.y = Math.PI; g.add(screen);
-  box(g, 0.05, 0.14, 0.05, legM, -0.38, 1.12, 1.07); box(g, 0.22, 0.015, 0.14, legM, -0.38, 1.062, 1.07);
-  box(g, 0.08, 0.08, 0.004, new THREE.MeshBasicMaterial({ color: agent.color }), -0.38, 1.36, 1.068);
-  box(g, 0.42, 0.02, 0.14, dark, 0, 1.065, 0.72);
-  g.add(mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.09, 10), new THREE.MeshStandardMaterial({ color: agent.color }), 0.55, 1.1, 0.8));
-  box(g, 0.24, 0.02, 0.3, mat(0xf4f4f2), 0.3, 1.065, 1.0).rotation.y = 0.2;
-
-  // whiteboard on a stand, Kanban facing the room
   const bx = side * 1.55, bz = -0.35;
-  const boardTex = canvasTex(800, 480);
-  box(g, 1.7, 1.1, 0.04, mat(0xc9ced6, { metalness: 0.3 }), bx, 1.5, bz);
-  g.add(mesh(new THREE.PlaneGeometry(1.62, 0.97), new THREE.MeshBasicMaterial({ map: boardTex }), bx, 1.52, bz + 0.022));
-  box(g, 1.7, 0.04, 0.1, legM, bx, 0.94, bz + 0.03);
-  for (const s of [-1, 1]) { box(g, 0.05, 0.95, 0.05, legM, bx + s * 0.78, 0.475, bz); box(g, 0.05, 0.04, 0.5, legM, bx + s * 0.78, 0.02, bz); }
+  let boardTex = null;
+  if (shared) {
+    // laptop on the shared table, screen (mini Gantt) tilted toward the agent
+    box(g, 0.34, 0.018, 0.24, legM, 0, 1.075, 0.74);
+    const lid = new THREE.Group();
+    lid.position.set(0, 1.085, 0.86);
+    lid.rotation.x = 0.28;
+    box(lid, 0.34, 0.23, 0.012, dark, 0, 0.115, 0);
+    const scr = mesh(new THREE.PlaneGeometry(0.31, 0.2), new THREE.MeshBasicMaterial({ map: screenTex }), 0, 0.115, -0.008);
+    scr.rotation.y = Math.PI; lid.add(scr);
+    box(lid, 0.05, 0.05, 0.003, new THREE.MeshBasicMaterial({ color: agent.color }), 0, 0.115, 0.008);
+    g.add(lid);
+    g.add(mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.08, 10), new THREE.MeshStandardMaterial({ color: agent.color }), 0.28, 1.1, 0.7));
+  } else {
+    // standing desk
+    box(g, 1.6, 0.05, 0.75, deskM, 0, 1.03, 0.85);
+    for (const s of [-1, 1]) { box(g, 0.07, 1.0, 0.07, legM, s * 0.68, 0.5, 0.85); box(g, 0.08, 0.04, 0.65, legM, s * 0.68, 0.02, 0.85); }
+    // monitor (faces the agent) + keyboard + mug
+    box(g, 0.62, 0.4, 0.03, dark, -0.38, 1.36, 1.05);
+    const screen = mesh(new THREE.PlaneGeometry(0.57, 0.35), new THREE.MeshBasicMaterial({ map: screenTex }), -0.38, 1.36, 1.033);
+    screen.rotation.y = Math.PI; g.add(screen);
+    box(g, 0.05, 0.14, 0.05, legM, -0.38, 1.12, 1.07); box(g, 0.22, 0.015, 0.14, legM, -0.38, 1.062, 1.07);
+    box(g, 0.08, 0.08, 0.004, new THREE.MeshBasicMaterial({ color: agent.color }), -0.38, 1.36, 1.068);
+    box(g, 0.42, 0.02, 0.14, dark, 0, 1.065, 0.72);
+    g.add(mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.09, 10), new THREE.MeshStandardMaterial({ color: agent.color }), 0.55, 1.1, 0.8));
+    box(g, 0.24, 0.02, 0.3, mat(0xf4f4f2), 0.3, 1.065, 1.0).rotation.y = 0.2;
+
+    // whiteboard on a stand, Kanban facing the room
+    boardTex = canvasTex(800, 480);
+    box(g, 1.7, 1.1, 0.04, mat(0xc9ced6, { metalness: 0.3 }), bx, 1.5, bz);
+    g.add(mesh(new THREE.PlaneGeometry(1.62, 0.97), new THREE.MeshBasicMaterial({ map: boardTex }), bx, 1.52, bz + 0.022));
+    box(g, 1.7, 0.04, 0.1, legM, bx, 0.94, bz + 0.03);
+    for (const s of [-1, 1]) { box(g, 0.05, 0.95, 0.05, legM, bx + s * 0.78, 0.475, bz); box(g, 0.05, 0.04, 0.5, legM, bx + s * 0.78, 0.02, bz); }
+  }
 
   // the agent
   const char = makeCharacter(agent.look);
@@ -112,10 +127,10 @@ export function buildStation(agent) {
     const hw = (Math.abs(cos) ? w : d) / 2, hd = (Math.abs(cos) ? d : w) / 2;
     return { x0: wx - hw, x1: wx + hw, z0: wz - hd, z1: wz + hd, on: true };
   };
-  const colliders = [rect(0, 0.85, 1.6, 0.75), rect(bx, bz, 1.7, 0.12), rect(0, 0, 0.5, 0.5)];
-  const boardPos = rect(bx, bz + 0.6, 0, 0);
+  const colliders = shared ? [rect(0, 0, 0.5, 0.5)] : [rect(0, 0.85, 1.6, 0.75), rect(bx, bz, 1.7, 0.12), rect(0, 0, 0.5, 0.5)];
+  const boardPos = shared ? rect(0, 0, 0, 0) : rect(bx, bz + 0.6, 0, 0);
 
-  const redraw = () => { drawBoard(boardTex, agent); drawScreen(screenTex, agent); };
+  const redraw = () => { if (boardTex) drawBoard(boardTex, agent); drawScreen(screenTex, agent); };
   redraw();
 
   return {
@@ -124,4 +139,20 @@ export function buildStation(agent) {
     boardPos: new THREE.Vector3(boardPos.x0, 0, boardPos.z0),
     ry, bodyYaw: 0, headYaw: 0, phase: Math.random() * 10,
   };
+}
+
+/** Wall-mounted Kanban shared by everyone at the contractors' table. */
+export function buildSharedBoard(agents, { x, y, z, ry }, title = 'Contractors') {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  g.rotation.y = ry;
+  const tex = canvasTex(800, 480);
+  box(g, 1.7, 1.06, 0.04, mat(0xc9ced6, { metalness: 0.3 }), 0, 0, 0);
+  g.add(mesh(new THREE.PlaneGeometry(1.62, 0.97), new THREE.MeshBasicMaterial({ map: tex }), 0, 0, 0.022));
+  const pseudo = { name: title, role: 'shared desk', color: agents[0]?.color ?? '#8e6ff7' };
+  const redraw = () => drawBoard(tex, pseudo, agents
+    .filter((a) => store.isActive(a))
+    .flatMap((a) => store.tasksFor(a.id).map((t) => ({ ...t, title: `${a.name}: ${t.title}` }))));
+  redraw();
+  return { group: g, redraw };
 }

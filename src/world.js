@@ -3,13 +3,14 @@
 // Everything is axis-aligned boxes so collision is plain AABBs in the XZ plane.
 import * as THREE from 'three';
 import { canvasTex, mat, mesh, box, speckle, repeat } from './util.js';
+import { TABLE, RESEARCH_TABLE } from './data.js';
 
 export const H = 2.8; // wall height
 const T = 0.2; // wall thickness
 
 export const ROOMS = [
   { id: 'living', name: 'Living Room · Dev Bullpen', short: 'Bullpen', x0: -12, x1: 0, z0: -1, z1: 7, floor: 'wood' },
-  { id: 'ceo', name: 'CEO Office · Hermes', short: 'CEO', x0: -12, x1: -6, z0: -7, z1: -1, floor: 'blue' },
+  { id: 'ceo', name: 'CEO Office · Richard', short: 'CEO', x0: -12, x1: -6, z0: -7, z1: -1, floor: 'blue' },
   { id: 'cfo', name: 'CFO Office', short: 'CFO', x0: -6, x1: 0, z0: -7, z1: -1, floor: 'green' },
   { id: 'marketing', name: 'Marketing Den', short: 'Marketing', x0: 0, x1: 6, z0: -7, z1: 1, floor: 'red' },
   { id: 'kitchen', name: 'Kitchen', short: 'Kitchen', x0: 0, x1: 6, z0: 1, z1: 7, floor: 'tile' },
@@ -203,18 +204,14 @@ export function buildWorld(scene) {
   B(0.06, 0.75, 1.3, M.black, -0.13, 1.55, 0.5); // TV
   B(0.02, 0.66, 1.2, new THREE.MeshBasicMaterial({ color: 0x1c3b5a }), -0.17, 1.55, 0.5);
   solid(0.4, 0.5, 1.5, M.woodLight, -0.32, 0.25, 0.5); // TV console
-  // shared work table with laptops + pizza
-  solid(2.0, 0.06, 1.0, M.woodLight, -7.5, 0.76, 3.0);
-  for (const [dx, dz] of [[-0.9, -0.4], [0.9, -0.4], [-0.9, 0.4], [0.9, 0.4]]) B(0.07, 0.74, 0.07, M.black, -7.5 + dx, 0.37, 3 + dz);
-  for (const [dx, rot] of [[-0.55, 0.2], [0.5, -0.3]]) {
-    const l = B(0.32, 0.02, 0.22, M.steel, -7.5 + dx, 0.8, 3.1); l.rotation.y = rot;
-    const s = B(0.32, 0.2, 0.015, M.black, -7.5 + dx, 0.9, 3.0); s.rotation.y = rot;
+  // shared standing-height table: the contractors' desk (their laptops come with their stations)
+  solid(TABLE.w, 0.06, TABLE.d, M.woodLight, TABLE.x, TABLE.h, TABLE.z);
+  for (const sx of [-1, 1]) {
+    B(0.08, TABLE.h - 0.03, 0.08, M.black, TABLE.x + sx * (TABLE.w / 2 - 0.15), (TABLE.h - 0.03) / 2, TABLE.z);
+    B(0.1, 0.04, TABLE.d - 0.1, M.black, TABLE.x + sx * (TABLE.w / 2 - 0.15), 0.02, TABLE.z);
   }
-  B(0.36, 0.04, 0.36, mat(0xd9c7a0), -7.45, 0.81, 2.72);
-  for (const [dx, dz] of [[-0.5, -0.85], [0.5, -0.85], [-0.5, 0.85], [0.5, 0.85]]) { // stools
-    scene.add(mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.06, 12), mat(0xd2553f), -7.5 + dx, 0.5, 3 + dz));
-    scene.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 6), M.steel, -7.5 + dx, 0.25, 3 + dz));
-  }
+  B(TABLE.w - 0.3, 0.05, 0.06, M.black, TABLE.x, TABLE.h - 0.25, TABLE.z); // crossbar
+  B(0.36, 0.04, 0.36, mat(0xd9c7a0), TABLE.x, TABLE.h + 0.05, TABLE.z); // pizza box
   const plant = (x, z, s = 1) => {
     scene.add(mesh(new THREE.CylinderGeometry(0.2 * s, 0.15 * s, 0.35 * s, 10), M.pot, x, 0.175 * s, z));
     scene.add(mesh(new THREE.SphereGeometry(0.34 * s, 10, 8), M.plant, x, 0.65 * s, z));
@@ -224,6 +221,17 @@ export function buildWorld(scene) {
   plant(-0.5, 6.5, 1.2); plant(-10.0, -0.55, 0.9);
 
   // ---------- kitchen ----------
+  // standing research table (researchers' laptops come with their stations)
+  {
+    const T = RESEARCH_TABLE;
+    solid(T.w, 0.06, T.d, M.woodLight, T.x, T.h, T.z);
+    for (const sx of [-1, 1]) {
+      B(0.08, T.h - 0.03, 0.08, M.black, T.x + sx * (T.w / 2 - 0.15), (T.h - 0.03) / 2, T.z);
+      B(0.1, 0.04, T.d - 0.1, M.black, T.x + sx * (T.w / 2 - 0.15), 0.02, T.z);
+    }
+    B(T.w - 0.3, 0.05, 0.06, M.black, T.x, T.h - 0.25, T.z);
+    for (let i = 0; i < 4; i++) B(0.24, 0.03, 0.32, mat([0xf4f4f2, 0xe9e2c8, 0xdfe6f0, 0xf4f4f2][i]), T.x + 0.55 + i * 0.03, T.h + 0.045 + i * 0.03, T.z + 0.12); // stack of papers
+  }
   solid(5.0, 0.9, 0.6, M.white, 3.4, 0.45, 6.6);
   B(5.1, 0.05, 0.66, mat(0x3a3d42), 3.4, 0.925, 6.6);
   B(0.5, 0.02, 0.4, M.steel, 2.2, 0.955, 6.6); // sink
