@@ -28,3 +28,17 @@ narrow profile in `apparmor-bwrap` (only bubblewrap gets the permission):
 The Paperclip unit preloads the runner platform probe (see the comment in
 `paperclip-sen.service`); without it Paperclip reports the Paperclip Runner
 unavailable on a 2-vCPU instance.
+
+## Tools agents can see
+
+The Paperclip Runner sandbox hides the home folder and `/opt`, so tools agents
+call must live under `/usr/local`:
+
+    sudo cp -a ~/.nvm/versions/node/v24.20.0 /usr/local/lib/node-v24.20.0
+    for b in node npm npx codex; do sudo ln -sf /usr/local/lib/node-v24.20.0/bin/$b /usr/local/bin/$b; done
+    sudo python3 -m venv /usr/local/lib/tavily-cli-venv
+    sudo /usr/local/lib/tavily-cli-venv/bin/pip install tavily-cli==0.2.1 tavily-python==0.8.5
+
+plus the `tvly` wrapper in `/usr/local/bin/tvly` (it sets HOME to
+`$PWD/.tavily-home` and execs `/usr/local/lib/tavily-cli-venv/bin/tvly`).
+Verified with SPA-56 on 13 Nov 2026.
