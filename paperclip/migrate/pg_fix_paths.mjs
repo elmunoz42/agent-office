@@ -6,7 +6,7 @@ const [dataDir, port] = process.argv.slice(2);
 const live = ["agents.adapter_config","projects.execution_workspace_policy","project_workspaces.cwd",
   "execution_workspaces.cwd","execution_workspaces.metadata","execution_workspaces.provider_ref",
   "company_skills.source_locator","agent_instruction_working_copies.local_root","agent_instruction_working_copies.execution_root"];
-const maps = [["/Users/carlosm.kampff/Desktop/dev/agent-os-paperclip","/home/ec2-user/dev/agent-os-paperclip"],
+const maps = [["/Users/carlosm.kampff/Desktop/dev/agent-os-paperclip","/home/ec2-user/dev/agent-office/agent-os"],
   ["/Users/carlosm.kampff/Desktop/dev/space-exploration-news","/home/ec2-user/dev/space-exploration-news"],
   ["/Users/carlosm.kampff","/home/ec2-user"]];
 const pg = new EmbeddedPostgres({ databaseDir: dataDir, port: Number(port), user: "paperclip", password: "paperclip", persistent: true });

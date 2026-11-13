@@ -2,21 +2,21 @@
   "about": "Skills given to individual Paperclip agents. Each key is a folder here; sync_skills.py pushes them into Paperclip and assigns them by office id. Third-party skills are copied at the pinned commit after a read-through; update by re-copying from a newer commit and re-vetting.",
   "skills": {
     "prototype": {
-      "source": "agent-os paperclip branch (skills/prototype), adapted from mattpocock/skills@5863806",
+      "source": "agent-os/skills/prototype in this repo, adapted from mattpocock/skills@5863806",
       "license": "MIT",
       "agents": [
         "hermes"
       ]
     },
     "grill-me-with-docs": {
-      "source": "agent-os paperclip branch (skills/grill-me-with-docs), adapted from mattpocock/skills@5863806",
+      "source": "agent-os/skills/grill-me-with-docs in this repo, adapted from mattpocock/skills@5863806",
       "license": "MIT",
       "agents": [
         "hermes"
       ]
     },
     "graduate-prototype": {
-      "source": "agent-os paperclip branch (skills/graduate-prototype)",
+      "source": "agent-os/skills/graduate-prototype in this repo",
       "license": "MIT",
       "agents": [
         "hermes"
