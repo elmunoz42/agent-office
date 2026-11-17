@@ -262,7 +262,8 @@ def main(argv):
         if not rest:
             die("usage: craft.py get NAME [DEST]")
         name = rest[0].replace("/work/outputs/", "").lstrip("/")
-        dest = rest[1] if len(rest) > 1 else os.path.basename(name)
+        # default under .craft/ (git-ignored in sen-app) so downloads never get committed
+        dest = rest[1] if len(rest) > 1 else os.path.join(".craft", "downloads", os.path.basename(name))
         download(name, dest)
         print(f"saved {dest} ({os.path.getsize(dest)} bytes)")
     elif cmd == "preview":

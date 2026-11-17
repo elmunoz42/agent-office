@@ -39,12 +39,12 @@ $C help photocraft convert              # an app's CLI help
 $C run request.json                     # run steps, see below
 $C cli pdfcraft info /work/outputs/x.pdf   # one CLI subcommand, verbatim
 $C files                                # what is in /work/outputs
-$C get SPA-70-launch-banner.png         # download an export into the current folder
+$C get SPA-70-launch-banner.png         # download an export to .craft/downloads/
 $C preview SPA-70-launch-banner.png     # small image of a PNG/JPG export, saved to .craft/previews/
 $C preview SPA-70-deck.pdf --page 2     # one page of a PDF as an image
 ```
 
-Preview images are saved to `.craft/previews/` in the current folder. Never commit `.craft/`.
+Downloads go to `.craft/downloads/` and preview images to `.craft/previews/` in the current folder. Never commit `.craft/` (sen-app ignores it).
 
 ## If you have native `artcraft_*` tools
 
