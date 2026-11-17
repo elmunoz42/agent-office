@@ -16,6 +16,39 @@ http://localhost:9119/chat (Hermes chat; no login, so keep it on the tunnel).
 Paperclip runs in local_trusted mode: anything that reaches port 3100 is the
 board, so never expose these ports publicly.
 
+## ArtCraft design apps for Richard and Erlich
+
+The Craft apps run on the separate `artcraft-cloud` instance
+(github.com/elmunoz42/artcraft-aws-server), weekdays 5pm to 9pm Pacific only.
+Its MCP endpoint, `http://<artcraft-cloud private IP>:8811/mcp`, accepts only
+this host's private IP and needs its bearer token, which lives in
+`/opt/artcraft-cloud/.env` (`MCP_TOKEN`) on that instance. Nothing about it is in
+this repo. Three places hold the token on this host:
+
+- **Paperclip runs (Erlich).** Company secret `ARTCRAFT_MCP_TOKEN`, bound in
+  Erlich's adapter env together with `ARTCRAFT_MCP_URL`. The `artcraft-apps`
+  skill's `craft.py` reads them.
+- **Paperclip runs (Richard).** Same skill. Hermes keeps the token as
+  `MCP_ARTCRAFT_API_KEY` in `~/.hermes/.env`, and `craft.py` falls back to it.
+  His toolsets include `vision` so he can look at the previews. Do not add
+  `mcp-artcraft` to his `--toolsets`: Hermes rejects that runtime name there.
+- **Hermes web chat (you with Richard).** In `~/.hermes/config.yaml`:
+
+      mcp_servers:
+        artcraft:
+          url: "http://<artcraft-cloud private IP>:8811/mcp"
+          headers:
+            Authorization: "Bearer ${MCP_ARTCRAFT_API_KEY}"
+          connect_timeout: 8
+
+  then `systemctl --user restart hermes-dashboard`. Check with
+  `hermes mcp test artcraft` (it only connects while the instance is up).
+
+If a Paperclip run of Richard's fails with "Cannot reconcile Hermes skill ...
+occupied by another installation", a skill sync left a stale symlink in
+`~/.hermes/skills/<skill>--<hash>`. Delete the symlink and rerun; Paperclip
+recreates it.
+
 ## Ubuntu 24.04: allow the agent sandbox
 
 Ubuntu blocks unprivileged user namespaces by default, and the Codex sandbox
