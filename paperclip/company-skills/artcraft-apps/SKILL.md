@@ -18,7 +18,7 @@ The company runs its own server with the headless Craft apps. You drive them wit
 
 ## Rules
 
-1. **Drafts only.** Never publish, post or send results anywhere. Attach or link them in the task for review.
+1. **Save to the server; never post outside.** Saving and exporting files to `/work/outputs/` is what you are here to do, and you do not need to ask first. Those files are copied within about a minute to the company's private S3 bucket (`outputs/` in `artcraft-cloud-171824086147-us-east-2`), where the board reviews them. That bucket is private: saving a file there does not make it public. What you must not do is put work anywhere outside: no posting to social media or the website, no emailing, no public links. Attach or link the files in the task for review.
 2. **The token is a secret.** It is in `ARTCRAFT_MCP_TOKEN` (for Hermes: `MCP_ARTCRAFT_API_KEY`). Never print, echo, log or write it to a file. Use the helper script, which reads it from the environment. If it is missing or the server answers 401, stop and tell the board; do not look for another token.
 3. **Save only under `/work/outputs/`.** That is the one folder on the server you can write to and download from. Use clear names with the task id, for example `/work/outputs/SPA-70-launch-banner.png`. Other agents share the folder: do not overwrite or delete files you did not make.
 4. **Rights.** Use only the company's own assets or clearly licensed material. No real people's likeness, no other outlets' logos or work. Label anything that could be mistaken for real mission imagery as an illustration.
@@ -78,6 +78,8 @@ Some agents (Richard, through Hermes) are connected to the same server directly 
 - `input`: an existing file to open (under `/work/inputs/` or `/work/outputs/`).
 - `preview`: `"auto"` returns a small image of the result. Use it on every export.
 - `timeout_ms`: default 120000. Raise it for heavy work.
+
+Do not call the paid generator by mistake: this skill's helper is `craft.py`. `artcraft.py` belongs to `artcraft-generate` and spends credits.
 
 Each run is a fresh session: nothing carries over between runs except files. A run either starts a new document or opens `input`.
 
