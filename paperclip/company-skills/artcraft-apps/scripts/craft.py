@@ -9,9 +9,16 @@ ARTCRAFT_MCP_TOKEN and never prints it. Needs only python3.
     craft.py help APP [ARGS...]           an app's --help text
     craft.py run request.json             run steps (the artcraft_run arguments as JSON)
     craft.py cli APP ARG [ARG...]         run one CLI subcommand verbatim
-    craft.py files                        list exported files on the server
-    craft.py get NAME [DEST]              download an export from the server's outputs/
+    craft.py files                        list this project's exported files on the server
+    craft.py get NAME [DEST]              download an export from this project's folder
     craft.py preview NAME [--page N]      small image of an exported PNG/JPG/PDF, to look at your work
+
+The server is shared by several projects. Each keeps its files in
+/work/outputs/<project>/ (ARTCRAFT_PROJECT, default space-exploration-news), and
+the S3 copy lands in outputs/<project>/. craft.py puts every /work/outputs/ path
+it sends (run input/output, cli args, get, preview, files) into that folder, so
+"/work/outputs/SPA-70-banner.png" is saved as
+"/work/outputs/space-exploration-news/SPA-70-banner.png".
 
 Preview images returned by run/cli are saved under .craft/previews/ and their
 paths printed, never dumped as base64.
@@ -30,6 +37,31 @@ import urllib.request
 URL = os.environ.get("ARTCRAFT_MCP_URL", "http://172.31.7.218:8811").rstrip("/")
 OPEN_HOUR, CLOSE_HOUR = 17, 21          # 5pm to 9pm
 ZONE = "America/Los_Angeles"            # weekdays only
+PROJECT = (os.environ.get("ARTCRAFT_PROJECT") or "space-exploration-news").strip().strip("/")
+OUT = "/work/outputs/"
+
+
+def rel(name):
+    """Path relative to the server's outputs/, inside this project's folder."""
+    name = name[len(OUT):] if name.startswith(OUT) else name.lstrip("/")
+    if name == PROJECT or name.startswith(PROJECT + "/"):
+        return name
+    return f"{PROJECT}/{name}"
+
+
+def server_path(p):
+    """Move a /work/outputs/ path into this project's folder; leave other paths alone."""
+    if isinstance(p, str) and (p.startswith(OUT) or p == OUT.rstrip("/")):
+        return OUT + rel(p[len(OUT):] if p.startswith(OUT) else "")
+    return p
+
+
+def server_arg(a):
+    """Same for one CLI argument, including the --flag=/work/outputs/... form."""
+    if isinstance(a, str) and "=" + OUT in a and not a.startswith(OUT):
+        k, v = a.split("=", 1)
+        return f"{k}={server_path(v)}"
+    return server_path(a)
 
 
 def die(msg, code=1):
@@ -174,13 +206,13 @@ IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".gif", ".bmp")
 
 def preview(name, page=1):
     """Make a small image of an exported file and download it, so the result can be looked at."""
-    name = name.replace("/work/outputs/", "").lstrip("/")
+    name = rel(name)
     stem, ext = os.path.splitext(os.path.basename(name))
     ext = ext.lower()
-    server = "/work/outputs/" + name
+    server = OUT + name
     sess = Session()
     if ext == ".pdf":
-        small = f".previews/{stem}-p{page}.png"
+        small = f"{PROJECT}/.previews/{stem}-p{page}.png"
         out, err = sess.tool("artcraft_cli", {"app": "pdfcraft", "args": [
             "render", server, "--page", str(page), "--dpi", "72", "--out", "/work/outputs/" + small]}, quiet=True)
         if err or '"exit_code":0' not in out.replace(" ", ""):
@@ -195,7 +227,7 @@ def preview(name, page=1):
         if longest <= PREVIEW_MAX:
             small = name
         else:
-            small = f".previews/{stem}-preview.png"
+            small = f"{PROJECT}/.previews/{stem}-preview.png"
             pct = max(1, int(PREVIEW_MAX * 100 / longest))
             out, err = sess.tool("artcraft_run", {"app": "photocraft", "input": server,
                                                   "steps": [{"id": "image.imageSize", "params": {"percent": pct}}],
@@ -248,20 +280,23 @@ def main(argv):
             die("usage: craft.py run request.json")
         with open(rest[0]) as f:
             args = json.load(f)
+        for k in ("input", "output"):
+            if k in args:
+                args[k] = server_path(args[k])
         Session().tool("artcraft_run", args, timeout=int(args.get("timeout_ms", 120000)) / 1000 + 60)
     elif cmd == "cli":
         if len(rest) < 2:
             die("usage: craft.py cli APP ARG [ARG...]")
-        Session().tool("artcraft_cli", {"app": rest[0], "args": rest[1:]})
+        Session().tool("artcraft_cli", {"app": rest[0], "args": [server_arg(a) for a in rest[1:]]})
     elif cmd == "files":
-        resp = http("/files/", headers={"Accept": "application/json"})
+        resp = http(f"/files/{urllib.parse.quote(PROJECT)}/", headers={"Accept": "application/json"})
         for e in json.loads(resp.read() or "[]"):
             kind = "dir " if e.get("is_dir") else "file"
             print(f"{kind} {e.get('size', 0):>10}  {e.get('mod_time', '')[:19]}  {e.get('name')}")
     elif cmd == "get":
         if not rest:
             die("usage: craft.py get NAME [DEST]")
-        name = rest[0].replace("/work/outputs/", "").lstrip("/")
+        name = rel(rest[0])
         # default under .craft/ (git-ignored in sen-app) so downloads never get committed
         dest = rest[1] if len(rest) > 1 else os.path.join(".craft", "downloads", os.path.basename(name))
         download(name, dest)

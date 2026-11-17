@@ -18,12 +18,12 @@ The company runs its own server with the headless Craft apps. You drive them wit
 
 ## Rules
 
-1. **Save to the server; never post outside.** Saving and exporting files to `/work/outputs/` is what you are here to do, and you do not need to ask first. Those files are copied within about a minute to the company's private S3 bucket (`outputs/` in `artcraft-cloud-171824086147-us-east-2`), where the board reviews them. That bucket is private: saving a file there does not make it public. What you must not do is put work anywhere outside: no posting to social media or the website, no emailing, no public links. Attach or link the files in the task for review.
+1. **Save to the server; never post outside.** Saving and exporting files to `/work/outputs/space-exploration-news/` is what you are here to do, and you do not need to ask first. Those files are copied within about a minute to the company's private S3 bucket (`outputs/space-exploration-news/` in `artcraft-cloud-171824086147-us-east-2`), where the board reviews them. That bucket is private: saving a file there does not make it public. What you must not do is put work anywhere outside: no posting to social media or the website, no emailing, no public links. Attach or link the files in the task for review.
 2. **The token is a secret.** It is in `ARTCRAFT_MCP_TOKEN` (for Hermes: `MCP_ARTCRAFT_API_KEY`). Never print, echo, log or write it to a file. Use the helper script, which reads it from the environment. If it is missing or the server answers 401, stop and tell the board; do not look for another token.
-3. **Save only under `/work/outputs/`.** That is the one folder on the server you can write to and download from. Use clear names with the task id, for example `/work/outputs/SPA-70-launch-banner.png`. Other agents share the folder: do not overwrite or delete files you did not make.
+3. **Save only under `/work/outputs/space-exploration-news/`.** The server is shared with other projects, and each has its own folder under `/work/outputs/`; this one is Space Exploration News's. `craft.py` moves any `/work/outputs/` path you give it into that folder for you. When you call the `mcp__artcraft__*` tools directly (Hermes chat), write the full path yourself. Never save to `/work/outputs/` itself or to another project's folder. Use clear names with the task id, for example `/work/outputs/space-exploration-news/SPA-70-launch-banner.png`. Other agents share the folder: do not overwrite or delete files you did not make.
 4. **Rights.** Use only the company's own assets or clearly licensed material. No real people's likeness, no other outlets' logos or work. Label anything that could be mistaken for real mission imagery as an illustration.
 5. **Look before you report.** Run `craft.py preview NAME` on every export, open the image it saves, and check it against the brief (text spelled right, nothing cut off, right size) before calling it done. For a deck or multi-page PDF, preview every page. Then show the board: attach the final files and the preview images to the task.
-6. **Keep the editable project file.** Alongside each export, save the app's own project file in `/work/outputs/` (for example `.deckcraft` for a deck). The board downloads these from S3 and opens them in ArtCraft on their own computer, so a PNG or PDF alone is not enough.
+6. **Keep the editable project file.** Alongside each export, save the app's own project file in the same folder (for example `.deckcraft` for a deck). The board downloads these from S3 and opens them in ArtCraft on their own computer, so a PNG or PDF alone is not enough.
 
 ## Helper script
 
@@ -37,8 +37,8 @@ $C commands vectorcraft text            # find command IDs by keyword
 $C commands vectorcraft --ids text.create,shape.rectangle   # parameters of exact commands
 $C help photocraft convert              # an app's CLI help
 $C run request.json                     # run steps, see below
-$C cli pdfcraft info /work/outputs/x.pdf   # one CLI subcommand, verbatim
-$C files                                # what is in /work/outputs
+$C cli pdfcraft info /work/outputs/space-exploration-news/x.pdf   # one CLI subcommand
+$C files                                # what is in this project's folder
 $C get SPA-70-launch-banner.png         # download an export to .craft/downloads/
 $C preview SPA-70-launch-banner.png     # small image of a PNG/JPG export, saved to .craft/previews/
 $C preview SPA-70-deck.pdf --page 2     # one page of a PDF as an image
@@ -71,14 +71,14 @@ In a direct Hermes chat, Richard is connected to the same server and sees five t
     {"id": "shape.rectangle", "params": {"x": 0, "y": 0, "width": 1200, "height": 630}},
     {"id": "text.create", "params": {"x": 80, "y": 330, "text": "Space Exploration News", "size": 72}}
   ],
-  "output": "/work/outputs/SPA-70-banner.png",
+  "output": "/work/outputs/space-exploration-news/SPA-70-banner.png",
   "preview": "auto"
 }
 ```
 
 - `steps`: command `id` plus `params`. Find IDs with `commands APP <keyword>`, then read their parameters with `commands APP --ids a,b`. Do not guess parameter names.
 - `output`: file to write; the extension picks the format. To keep working on a design later, also save the app's own project format and pass it back as `input` in the next run.
-- `input`: an existing file to open (under `/work/inputs/` or `/work/outputs/`).
+- `input`: an existing file to open (under `/work/inputs/` or this project's folder in `/work/outputs/`).
 - `preview`: `"auto"` returns a small image with the run, but only when the export is an image of at most 1024 px on its longest side. Do not rely on it: use `craft.py preview NAME` afterwards, which works for any size and for PDFs.
 - `timeout_ms`: default 120000. Raise it for heavy work.
 

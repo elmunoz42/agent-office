@@ -25,10 +25,12 @@ from [elmunoz42/artcraft-aws-server](https://github.com/elmunoz42/artcraft-aws-s
   private MCP endpoint on the VPC, open only to this host and protected by a
   bearer token (Paperclip secret `ARTCRAFT_MCP_TOKEN`). In the Hermes web chat,
   Richard also has the apps as native tools (see `paperclip/systemd/README.md`).
-- **Where the files go.** Exports land in the instance's `outputs/` folder and
-  are copied within a minute to the private S3 bucket
-  `artcraft-cloud-171824086147-us-east-2` under `outputs/`, for the board to
-  review. Agents also save each design's editable project file so it can be
+- **Where the files go.** The server is shared by several projects, each with
+  its own folder. This company's exports land in the instance's
+  `outputs/space-exploration-news/` folder and are copied within a minute to
+  the private S3 bucket `artcraft-cloud-171824086147-us-east-2` under
+  `outputs/space-exploration-news/`, for the board to review. `craft.py` keeps
+  every path in that folder (set `ARTCRAFT_PROJECT` to use another one). Agents also save each design's editable project file so it can be
   opened in ArtCraft on a desktop. Nothing there is public.
 - **Free.** No credits are spent. AI image and video generation is a separate
   skill, `artcraft-generate`, which uses paid ArtCraft credits.
