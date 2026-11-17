@@ -19,6 +19,7 @@ import base64
 import datetime
 import json
 import os
+import socket
 import sys
 import time
 import urllib.error
@@ -31,7 +32,8 @@ ZONE = "America/Los_Angeles"            # weekdays only
 
 
 def die(msg, code=1):
-    sys.exit(f"craft: {msg}")
+    print(f"craft: {msg}", file=sys.stderr)
+    sys.exit(code)
 
 
 def token():
@@ -55,7 +57,33 @@ def window_state():
     return is_open, f"it is {when}; the server runs {hours}"
 
 
+def unreachable(reason):
+    is_open, desc = window_state()
+    if not is_open:
+        die(f"the ArtCraft server is not reachable and that is expected: {desc}. "
+            "Leave a note in the task and continue when it is up; do not retry in a loop.", 3)
+    die(f"the ArtCraft server is not reachable ({reason}) although {desc}. "
+        "It needs a few minutes after 5pm to start. Try once more in 5 minutes, then tell the board.", 2)
+
+
+_checked = False
+
+
+def check_reachable():
+    """Fail within seconds when the server is switched off, instead of hanging on a long read timeout."""
+    global _checked
+    if _checked:
+        return
+    u = urllib.parse.urlparse(URL)
+    try:
+        socket.create_connection((u.hostname, u.port or (443 if u.scheme == "https" else 80)), timeout=6).close()
+    except OSError as e:
+        unreachable(e)
+    _checked = True
+
+
 def http(path, body=None, headers=None, timeout=200):
+    check_reachable()
     h = {"Authorization": f"Bearer {token()}"}
     h.update(headers or {})
     req = urllib.request.Request(URL + path, method="POST" if body is not None else "GET",
@@ -69,12 +97,7 @@ def http(path, body=None, headers=None, timeout=200):
             die(f"not found on the server: {path}")
         die(f"server returned HTTP {e.code}: {e.read()[:300].decode(errors='replace')}")
     except (urllib.error.URLError, OSError) as e:
-        is_open, desc = window_state()
-        if not is_open:
-            die(f"the ArtCraft server is not reachable and that is expected: {desc}. "
-                "Leave a note in the task and continue when it is up; do not retry in a loop.", 3)
-        die(f"the ArtCraft server is not reachable ({e}) although {desc}. "
-            "It needs a few minutes after 5pm to start. Try once more in 5 minutes, then tell the board.", 2)
+        unreachable(e)
 
 
 class Session:
