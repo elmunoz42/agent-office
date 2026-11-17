@@ -1,6 +1,6 @@
 ---
 name: artcraft-apps
-description: Make and edit marketing materials (banners, social graphics, flyers, one-pagers, slide decks, PDFs) with the company's own ArtCraft Craft apps server - PhotoCraft, VectorCraft, DesignCraft, DeckCraft and PdfCraft - driven headlessly through a helper script. Covers the server's working hours, finding commands, running them, previewing, and fetching the exported files. Use when a task asks for a designed visual, layout, deck or PDF. Free to use; no credits are spent.
+description: Make, edit and review marketing materials (banners, social graphics, flyers, one-pagers, slide decks, PDFs) with the company's own ArtCraft Craft apps server - PhotoCraft, VectorCraft, DesignCraft, DeckCraft and PdfCraft - driven headlessly through a helper script. Covers the server's working hours, finding commands, running them, previewing, and fetching the exported files. Use when a task asks for a designed visual, layout, deck or PDF. Free to use; no credits are spent.
 ---
 
 # ArtCraft Craft apps
@@ -76,7 +76,7 @@ In a direct Hermes chat, Richard is connected to the same server and sees five t
 - `steps`: command `id` plus `params`. Find IDs with `commands APP <keyword>`, then read their parameters with `commands APP --ids a,b`. Do not guess parameter names.
 - `output`: file to write; the extension picks the format. To keep working on a design later, also save the app's own project format and pass it back as `input` in the next run.
 - `input`: an existing file to open (under `/work/inputs/` or `/work/outputs/`).
-- `preview`: `"auto"` returns a small image of the result. Use it on every export.
+- `preview`: `"auto"` returns a small image of the result, but only if the exported image is at most 1024 px on its longest side. Anything larger (a 1200 x 630 banner, a 1080 x 1920 story) comes back with no preview. For those, export a second, smaller copy just for checking (for example the same design at half size, named `...-preview.png`), or download the file with `get` and open it.
 - `timeout_ms`: default 120000. Raise it for heavy work.
 
 Do not call the paid generator by mistake: this skill's helper is `craft.py`. `artcraft.py` belongs to `artcraft-generate` and spends credits.
@@ -89,6 +89,16 @@ Things that catch people out:
 - **Colours** are hex like `#1a2b3c`. Read the command's parameters: some refuse alpha forms.
 - **Fonts** on the server are limited (DejaVu, Liberation). If a command warns that a font is unavailable, it used a fallback: say so in the task.
 - **A command listed as not enabled** needs something first, usually a selection or an open document of the right kind.
+
+## Reviewing someone else's files (QA)
+
+If you are asked to check design files another agent made, you do not need to open the apps to edit anything:
+
+- `$C files` lists what is on the server; `$C get NAME` downloads a file into your working folder so you can open it.
+- `$C cli pdfcraft info /work/outputs/NAME.pdf` reports page count, page size and warnings for a PDF. `$C cli photocraft info /work/outputs/NAME.png` reports an image's size and mode.
+- Check against the task's brief: right size, text correct and complete, nothing cut off, draft labels where asked, file names carrying the task id.
+- Do not change or delete the maker's files. If something is wrong, say what and where in the task and send it back.
+- The working hours apply to you too. Files are only reachable while the server is on.
 
 ## Source files
 
