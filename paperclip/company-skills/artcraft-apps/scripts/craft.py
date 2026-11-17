@@ -11,6 +11,7 @@ ARTCRAFT_MCP_TOKEN and never prints it. Needs only python3.
     craft.py cli APP ARG [ARG...]         run one CLI subcommand verbatim
     craft.py files                        list exported files on the server
     craft.py get NAME [DEST]              download an export from the server's outputs/
+    craft.py preview NAME [--page N]      small image of an exported PNG/JPG/PDF, to look at your work
 
 Preview images returned by run/cli are saved under .craft/previews/ and their
 paths printed, never dumped as base64.
@@ -130,12 +131,17 @@ class Session:
             die(f"{method} failed: {json.dumps(out['error'])[:500]}")
         return out.get("result", {})
 
-    def tool(self, name, args, timeout=200):
+    def tool(self, name, args, timeout=200, quiet=False):
+        """Call a tool and print its result. With quiet=True, return the text instead of printing."""
         res = self.rpc("tools/call", {"name": name, "arguments": args}, timeout=timeout)
-        shown = 0
+        shown, texts = 0, []
         for part in res.get("content", []):
             if part.get("type") == "text":
-                print(part.get("text", ""))
+                texts.append(part.get("text", ""))
+                if not quiet:
+                    print(part.get("text", ""))
+            elif quiet:
+                continue
             elif part.get("type") == "image":
                 os.makedirs(os.path.join(".craft", "previews"), exist_ok=True)
                 ext = (part.get("mimeType") or "image/png").split("/")[-1]
@@ -144,8 +150,65 @@ class Session:
                 with open(path, "wb") as f:
                     f.write(base64.b64decode(part.get("data", "")))
                 print(f"[preview saved: {path}]")
+        if quiet:
+            return "\n".join(texts), bool(res.get("isError"))
         if res.get("isError"):
             sys.exit(1)
+
+
+def download(name, dest):
+    resp = http("/files/" + urllib.parse.quote(name))
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    with open(dest, "wb") as f:
+        while True:
+            chunk = resp.read(1 << 16)
+            if not chunk:
+                break
+            f.write(chunk)
+    return dest
+
+
+PREVIEW_MAX = 1024
+IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".gif", ".bmp")
+
+
+def preview(name, page=1):
+    """Make a small image of an exported file and download it, so the result can be looked at."""
+    name = name.replace("/work/outputs/", "").lstrip("/")
+    stem, ext = os.path.splitext(os.path.basename(name))
+    ext = ext.lower()
+    server = "/work/outputs/" + name
+    sess = Session()
+    if ext == ".pdf":
+        small = f".previews/{stem}-p{page}.png"
+        out, err = sess.tool("artcraft_cli", {"app": "pdfcraft", "args": [
+            "render", server, "--page", str(page), "--dpi", "72", "--out", "/work/outputs/" + small]}, quiet=True)
+        if err or '"exit_code":0' not in out.replace(" ", ""):
+            die(f"could not render page {page} of {name}: {out[:400]}")
+    elif ext in IMAGE_EXTS:
+        out, err = sess.tool("artcraft_cli", {"app": "photocraft", "args": ["info", server]}, quiet=True)
+        try:
+            info = json.loads(out).get("result", {})
+            longest = max(int(info["width"]), int(info["height"]))
+        except Exception:
+            die(f"could not read the size of {name}: {out[:400]}")
+        if longest <= PREVIEW_MAX:
+            small = name
+        else:
+            small = f".previews/{stem}-preview.png"
+            pct = max(1, int(PREVIEW_MAX * 100 / longest))
+            out, err = sess.tool("artcraft_run", {"app": "photocraft", "input": server,
+                                                  "steps": [{"id": "image.imageSize", "params": {"percent": pct}}],
+                                                  "output": "/work/outputs/" + small}, quiet=True)
+            if err or '"exit_code":0' not in out.replace(" ", ""):
+                die(f"could not shrink {name}: {out[:400]}")
+        print(f"{name} is {info['width']} x {info['height']} px")
+    else:
+        die(f"cannot preview {ext or 'this'} files directly. Export a PDF or PNG of the same document "
+            "(for a deck, export PDF and preview each page), then preview that.")
+    dest = download(small, os.path.join(".craft", "previews", os.path.basename(small)))
+    print(f"preview saved: {dest}")
+    print("Open that image and look at it before reporting. If you cannot view images, say so in the task.")
 
 
 def main(argv):
@@ -200,14 +263,13 @@ def main(argv):
             die("usage: craft.py get NAME [DEST]")
         name = rest[0].replace("/work/outputs/", "").lstrip("/")
         dest = rest[1] if len(rest) > 1 else os.path.basename(name)
-        resp = http("/files/" + urllib.parse.quote(name))
-        with open(dest, "wb") as f:
-            while True:
-                chunk = resp.read(1 << 16)
-                if not chunk:
-                    break
-                f.write(chunk)
+        download(name, dest)
         print(f"saved {dest} ({os.path.getsize(dest)} bytes)")
+    elif cmd == "preview":
+        if not rest:
+            die("usage: craft.py preview NAME [--page N]")
+        page = int(rest[rest.index("--page") + 1]) if "--page" in rest and rest.index("--page") + 1 < len(rest) else 1
+        preview(rest[0], page)
     else:
         die(f"unknown command {cmd!r}; run craft.py --help")
 

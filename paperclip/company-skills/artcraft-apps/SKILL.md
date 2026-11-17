@@ -1,6 +1,6 @@
 ---
 name: artcraft-apps
-description: Make, edit and review marketing materials (banners, social graphics, flyers, one-pagers, slide decks, PDFs) with the company's own ArtCraft Craft apps server - PhotoCraft, VectorCraft, DesignCraft, DeckCraft and PdfCraft - driven headlessly through a helper script. Covers the server's working hours, finding commands, running them, previewing, and fetching the exported files. Use when a task asks for a designed visual, layout, deck or PDF. Free to use; no credits are spent.
+description: Make and edit marketing and sales materials (banners, social graphics, flyers, one-pagers, slide decks, PDFs) with the company's own ArtCraft Craft apps server - PhotoCraft, VectorCraft, DesignCraft, DeckCraft and PdfCraft - driven headlessly through a helper script. Covers the server's working hours, finding commands, running them, previewing, and fetching the exported files. Use when a task asks for a designed visual, layout, deck or PDF. Free to use; no credits are spent.
 ---
 
 # ArtCraft Craft apps
@@ -22,7 +22,8 @@ The company runs its own server with the headless Craft apps. You drive them wit
 2. **The token is a secret.** It is in `ARTCRAFT_MCP_TOKEN` (for Hermes: `MCP_ARTCRAFT_API_KEY`). Never print, echo, log or write it to a file. Use the helper script, which reads it from the environment. If it is missing or the server answers 401, stop and tell the board; do not look for another token.
 3. **Save only under `/work/outputs/`.** That is the one folder on the server you can write to and download from. Use clear names with the task id, for example `/work/outputs/SPA-70-launch-banner.png`. Other agents share the folder: do not overwrite or delete files you did not make.
 4. **Rights.** Use only the company's own assets or clearly licensed material. No real people's likeness, no other outlets' logos or work. Label anything that could be mistaken for real mission imagery as an illustration.
-5. **Look before you report.** Open the preview image of every export and check it against the brief (text spelled right, nothing cut off, right size) before calling it done.
+5. **Look before you report.** Run `craft.py preview NAME` on every export, open the image it saves, and check it against the brief (text spelled right, nothing cut off, right size) before calling it done. For a deck or multi-page PDF, preview every page. Then show the board: attach the final files and the preview images to the task.
+6. **Keep the editable project file.** Alongside each export, save the app's own project file in `/work/outputs/` (for example `.deckcraft` for a deck). The board downloads these from S3 and opens them in ArtCraft on their own computer, so a PNG or PDF alone is not enough.
 
 ## Helper script
 
@@ -39,6 +40,8 @@ $C run request.json                     # run steps, see below
 $C cli pdfcraft info /work/outputs/x.pdf   # one CLI subcommand, verbatim
 $C files                                # what is in /work/outputs
 $C get SPA-70-launch-banner.png         # download an export into the current folder
+$C preview SPA-70-launch-banner.png     # small image of a PNG/JPG export, saved to .craft/previews/
+$C preview SPA-70-deck.pdf --page 2     # one page of a PDF as an image
 ```
 
 Preview images are saved to `.craft/previews/` in the current folder. Never commit `.craft/`.
@@ -76,7 +79,7 @@ In a direct Hermes chat, Richard is connected to the same server and sees five t
 - `steps`: command `id` plus `params`. Find IDs with `commands APP <keyword>`, then read their parameters with `commands APP --ids a,b`. Do not guess parameter names.
 - `output`: file to write; the extension picks the format. To keep working on a design later, also save the app's own project format and pass it back as `input` in the next run.
 - `input`: an existing file to open (under `/work/inputs/` or `/work/outputs/`).
-- `preview`: `"auto"` returns a small image of the result, but only if the exported image is at most 1024 px on its longest side. Anything larger (a 1200 x 630 banner, a 1080 x 1920 story) comes back with no preview. For those, export a second, smaller copy just for checking (for example the same design at half size, named `...-preview.png`), or download the file with `get` and open it.
+- `preview`: `"auto"` returns a small image with the run, but only when the export is an image of at most 1024 px on its longest side. Do not rely on it: use `craft.py preview NAME` afterwards, which works for any size and for PDFs.
 - `timeout_ms`: default 120000. Raise it for heavy work.
 
 Do not call the paid generator by mistake: this skill's helper is `craft.py`. `artcraft.py` belongs to `artcraft-generate` and spends credits.
@@ -89,16 +92,6 @@ Things that catch people out:
 - **Colours** are hex like `#1a2b3c`. Read the command's parameters: some refuse alpha forms.
 - **Fonts** on the server are limited (DejaVu, Liberation). If a command warns that a font is unavailable, it used a fallback: say so in the task.
 - **A command listed as not enabled** needs something first, usually a selection or an open document of the right kind.
-
-## Reviewing someone else's files (QA)
-
-If you are asked to check design files another agent made, you do not need to open the apps to edit anything:
-
-- `$C files` lists what is on the server; `$C get NAME` downloads a file into your working folder so you can open it.
-- `$C cli pdfcraft info /work/outputs/NAME.pdf` reports page count, page size and warnings for a PDF. `$C cli photocraft info /work/outputs/NAME.png` reports an image's size and mode.
-- Check against the task's brief: right size, text correct and complete, nothing cut off, draft labels where asked, file names carrying the task id.
-- Do not change or delete the maker's files. If something is wrong, say what and where in the task and send it back.
-- The working hours apply to you too. Files are only reachable while the server is on.
 
 ## Source files
 
