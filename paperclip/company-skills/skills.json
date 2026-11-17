@@ -308,6 +308,16 @@
         "security"
       ]
     },
+    "artcraft-apps": {
+      "source": "custom (agent-office); drives the artcraft-cloud MCP endpoint (xiewg1987/artcraft-command-bridge tools over the storytold Craft CLIs)",
+      "license": "MIT",
+      "author": "Agent Office",
+      "agents": [
+        "marketing",
+        "hermes"
+      ],
+      "note": "Needs the ARTCRAFT_MCP_TOKEN Paperclip secret bound to Erlich's env. Richard uses Hermes's native MCP connection (mcp_servers.artcraft in ~/.hermes/config.yaml, token MCP_ARTCRAFT_API_KEY in ~/.hermes/.env, toolset mcp-artcraft). The server runs weekdays 5pm-9pm Pacific only. Free: no credits."
+    },
     "artcraft-generate": {
       "source": "custom (agent-office), based on storytold/artcraft@84a6a7d:_docs/artcraft_omni_api.md",
       "license": "MIT",
