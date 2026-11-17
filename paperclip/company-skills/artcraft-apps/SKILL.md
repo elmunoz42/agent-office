@@ -45,7 +45,7 @@ Preview images are saved to `.craft/previews/` in the current folder. Never comm
 
 ## If you have native `artcraft_*` tools
 
-Some agents (Richard, through Hermes) are connected to the same server directly and see five tools: `artcraft_apps`, `artcraft_commands`, `artcraft_run`, `artcraft_cli`, `artcraft_help`. They are the same operations as the script's `apps`, `commands`, `run`, `cli` and `help`; the arguments of `artcraft_run` are exactly the `request.json` shown below. Use the tools directly, and use the script only for `window`, `files` and `get` (the tools cannot download a file to you). Every rule on this page applies either way, including the working hours: outside the window the tools are simply missing or fail to connect.
+In a direct Hermes chat, Richard is connected to the same server and sees five tools named `mcp__artcraft__artcraft_apps`, `..._commands`, `..._run`, `..._cli` and `..._help`. In Paperclip task runs those tools are not loaded, so use the script there. They are the same operations as the script's `apps`, `commands`, `run`, `cli` and `help`; the arguments of `artcraft_run` are exactly the `request.json` shown below. Use the tools directly, and use the script only for `window`, `files` and `get` (the tools cannot download a file to you). Every rule on this page applies either way, including the working hours: outside the window the tools are simply missing or fail to connect.
 
 ## Which app
 
