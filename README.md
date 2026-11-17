@@ -32,6 +32,26 @@ from [elmunoz42/artcraft-aws-server](https://github.com/elmunoz42/artcraft-aws-s
   `outputs/space-exploration-news/`, for the board to review. `craft.py` keeps
   every path in that folder (set `ARTCRAFT_PROJECT` to use another one). Agents also save each design's editable project file so it can be
   opened in ArtCraft on a desktop. Nothing there is public.
+- **Adding another project.** The server knows nothing about projects: it
+  copies everything under `/work/outputs/` to S3 `outputs/`, so the folder is
+  a convention set only by the `artcraft-apps` skill. The name
+  `space-exploration-news` is written in the skill's `SKILL.md` (four paths,
+  which agents read and Hermes chat's ArtCraft tools need in full) and is the
+  default in `scripts/craft.py`. `sync_skills.py` installs skills into one
+  company only (`COMPANY = "Space Exploration News"`). For a new project, say
+  `acme`:
+  1. Make a copy of the skill for that company, with the `SKILL.md` paths
+     changed to `/work/outputs/acme/`.
+  2. Set `ARTCRAFT_PROJECT=acme` on its agents, so `craft.py` writes there.
+  3. Install the skill into that company (change `COMPANY` in
+     `sync_skills.py`, or install it in the Paperclip UI).
+  4. Give those agents the MCP address and `ARTCRAFT_MCP_TOKEN`, as Erlich and
+     Richard have.
+
+  Its files then land in S3 under `outputs/acme/`. Copies of the skill must be
+  updated separately. The folders are not access control: anyone with the
+  token can read or write any project's folder. A project that needs real
+  separation needs its own token or its own server.
 - **Free.** No credits are spent. AI image and video generation is a separate
   skill, `artcraft-generate`, which uses paid ArtCraft credits.
 - Both instances are listed in the server room (the `infrastructure` document
